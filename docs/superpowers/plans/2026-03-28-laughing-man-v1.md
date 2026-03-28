@@ -143,7 +143,7 @@ Replace the generated `package.json` entirely:
     "resolveJsonModule": true,
     "types": ["bun-types"]
   },
-  "include": ["src/**/*", "themes/**/*", "tests/**/*"]
+  "include": ["src/**/*", "themes/**/*", "functions/**/*", "tests/**/*"]
 }
 ```
 
@@ -1076,8 +1076,9 @@ export async function processImages(
     mkdirSync(imageOutputDir, { recursive: true });
     copyFileSync(resolvedPath, join(imageOutputDir, filename));
 
-    const webSrc = `/images/${issueNumber}/${filename}`;
-    const emailSrc = `${siteUrl.replace(/\/$/, "")}/images/${issueNumber}/${filename}`;
+    const encodedFilename = encodeURIComponent(filename);
+    const webSrc = `/images/${issueNumber}/${encodedFilename}`;
+    const emailSrc = `${siteUrl.replace(/\/$/, "")}/images/${issueNumber}/${encodedFilename}`;
 
     const webTag = `<img${before}src="${webSrc}"${after}>`;
     const emailTag = `<img${before}src="${emailSrc}"${after}>`;
@@ -1654,8 +1655,8 @@ Expected: FAIL — `runBuild` not found.
 - [ ] **Step 3: Implement `src/commands/build.ts`**
 
 ```typescript
-import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, writeFileSync, rmSync, cpSync, existsSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { validateIssues } from "../pipeline/validation.js";
@@ -1686,6 +1687,9 @@ export async function runBuild(options: BuildOptions): Promise<void> {
   const outputDir = join(configDir, "output");
   const websiteDir = join(outputDir, "website");
   const emailDir = join(outputDir, "email");
+
+  // Clean previous output to avoid stale artifacts (e.g. issues changed from ready to draft)
+  rmSync(outputDir, { recursive: true, force: true });
 
   mkdirSync(websiteDir, { recursive: true });
   mkdirSync(emailDir, { recursive: true });
@@ -1724,6 +1728,13 @@ export async function runBuild(options: BuildOptions): Promise<void> {
   // Render index page (only ready issues, or all if includeDrafts)
   const indexHtml = IndexPage({ issues: sorted, config });
   writeFileSync(join(websiteDir, "index.html"), indexHtml, "utf8");
+
+  // Copy Pages Functions into output/ so wrangler can find them during deploy.
+  // Wrangler looks for functions/ in its CWD, and deploy runs from output/.
+  const functionsSource = resolve(import.meta.dirname, "../../functions");
+  if (existsSync(functionsSource)) {
+    cpSync(functionsSource, join(outputDir, "functions"), { recursive: true });
+  }
 
   console.log(`Build complete: ${sorted.length} issue(s) written to ${outputDir}`);
 }
@@ -1862,6 +1873,7 @@ export interface BroadcastSummary {
 export interface CreateBroadcastParams {
   audienceId: string;
   from: string;
+  replyTo?: string;
   subject: string;
   html: string;
   name: string;
@@ -1885,6 +1897,7 @@ export function createResendProvider(client: Resend): ResendProvider {
       const { data, error } = await client.broadcasts.create({
         audience_id: params.audienceId,
         from: params.from,
+        reply_to: params.replyTo,
         subject: params.subject,
         html: params.html,
         name: params.name,
@@ -2071,6 +2084,7 @@ export async function runSend(options: SendOptions): Promise<void> {
   const broadcastId = await provider.createBroadcast({
     audienceId,
     from: config.email_hosting.from,
+    replyTo: config.email_hosting.reply_to,
     subject: `${issue.title}`,
     html,
     name: broadcastName,
@@ -2098,7 +2112,8 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
 
   const config = await loadConfig(configDir);
 
-  const websiteDir = join(configDir, "output", "website");
+  const outputDir = join(configDir, "output");
+  const websiteDir = join(outputDir, "website");
   if (!existsSync(websiteDir)) {
     throw new Error(
       `output/website/ not found. Run 'laughing-man build' first.`
@@ -2116,10 +2131,13 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
 
   console.log(`Deploying to Cloudflare Pages (${config.web_hosting.project})...`);
 
+  // Run wrangler from output/ so it auto-detects the sibling functions/ directory.
+  // build copies functions/ into output/functions/ for this purpose.
   const proc = Bun.spawn([
-    "npx", "wrangler", "pages", "deploy", websiteDir,
+    "npx", "wrangler", "pages", "deploy", "website",
     `--project-name=${config.web_hosting.project}`,
   ], {
+    cwd: outputDir,
     stdout: "inherit",
     stderr: "inherit",
   });
@@ -2589,27 +2607,7 @@ cd /Users/vinta/Projects/laughing-man && bun test tests/functions/subscribe.test
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Update `build` command to copy `functions/` to output**
-
-The `build` command needs to copy the `functions/` directory alongside `output/website/` so that `wrangler pages deploy` picks up both the static assets and the Pages Functions.
-
-In `src/commands/build.ts`, after writing all HTML output, add:
-
-```typescript
-// Copy functions/ to output for Pages Function deployment
-import { cpSync } from "node:fs";
-import { resolve } from "node:path";
-
-const functionsSource = resolve(import.meta.dirname, "../../functions");
-const functionsDest = join(outputDir, "website", "_functions");
-// Note: wrangler pages deploy looks for functions/ relative to the project,
-// not inside the output directory. The functions/ dir at the repo root is
-// picked up automatically. No copy needed if deploying from the repo root.
-```
-
-Actually, `wrangler pages deploy` with a `functions/` directory at the repo root picks up Pages Functions automatically. No changes to `build` are needed. Verify this in the smoke test.
-
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 Use the commit skill.
 

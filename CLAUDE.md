@@ -49,3 +49,4 @@ When you need information about tools used in this project, use the `find-docs` 
 | Resend API       | `/websites/resend`                       |
 | Wrangler         | `/cloudflare/workers-sdk`                |
 | Cloudflare Pages | `/websites/developers_cloudflare_pages`  |
+| CF Workers (Pages Functions runtime) | `/websites/developers_cloudflare_workers` |

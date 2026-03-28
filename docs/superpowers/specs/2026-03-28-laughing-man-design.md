@@ -246,9 +246,22 @@ The Pages Function reads `RESEND_API_KEY` and `RESEND_AUDIENCE_ID` from Cloudfla
 
 The function uses `fetch()` directly against Resend's REST API. No SDK needed at the edge.
 
+### Deployment
+
+The `build` command copies `functions/` from the package source into `output/functions/`. The `deploy` command runs `wrangler pages deploy website` from inside `output/`, where Wrangler auto-detects the sibling `functions/` directory. This avoids littering the user's newsletter directory with package internals.
+
+```
+output/
+  website/        # Static HTML (deployed to Pages)
+  functions/      # Pages Functions (auto-detected by Wrangler)
+    api/
+      subscribe.ts
+  email/          # Email HTML (used by send, not deployed)
+```
+
 ### No new dependencies
 
-The Pages Function runs in the Cloudflare Workers runtime, not in the npm package. It uses the Web `fetch()` API to call Resend, so no `resend` SDK import is needed. The function file ships as part of the build output.
+The Pages Function runs in the Cloudflare Workers runtime, not in the npm package. It uses the Web `fetch()` API to call Resend, so no `resend` SDK import is needed.
 
 ## CI Support
 
@@ -275,7 +288,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy output/website --project-name=laughing-man
+          workingDirectory: output
+          command: pages deploy website --project-name=laughing-man
 
   send:
     needs: build-and-deploy
@@ -296,7 +310,7 @@ Deployment uses Cloudflare's `wrangler-action` to upload `output/website/` direc
 - Works with private repos on the free GitHub plan (GitHub Pages requires Pro for private repos)
 - Unlimited bandwidth (GitHub Pages has a 100GB/mo soft cap)
 - Global edge network with automatic asset optimization
-- Aligns with the Cloudflare Workers stack planned for the subscribe system in v2
+- Aligns with the Cloudflare Workers stack (subscribe system uses Pages Functions)
 
 ## Package Structure
 
