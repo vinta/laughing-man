@@ -1,5 +1,5 @@
 {
-  "name": "laughing-man",
+  "name": "@vinta/laughing-man",
   "version": "0.1.0",
   "description": "Turn your Markdown into a newsletter",
   "type": "module",
