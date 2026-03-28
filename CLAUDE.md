@@ -34,6 +34,17 @@ bun run typecheck       # TypeScript check
 bun src/cli.ts --help   # Run CLI locally
 ```
 
+### Local CLI testing
+
+Run `bun link` from the project root to register the package globally. This symlinks to source, so code changes take effect immediately without re-running.
+
+```bash
+bun link                       # One-time setup
+bunx laughing-man --help       # Works from any directory
+```
+
+Re-run `bun link` after Bun upgrades or if `bunx laughing-man` stops resolving.
+
 ## External Tool Documentation
 
 When you need information about tools used in this project, use the `find-docs` skill or the Cloudflare skills listed below.
