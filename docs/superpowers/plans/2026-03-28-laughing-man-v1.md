@@ -164,8 +164,6 @@ export interface SiteConfig {
   url: string;
   issues_dir: string;           // Resolved absolute path
   attachments_dir?: string;     // Resolved absolute path (optional)
-  theme: string;
-  theme_options?: Record<string, string>;
   web_hosting: {
     provider: "cloudflare-pages";
     project: string;               // Cloudflare Pages project name
@@ -199,7 +197,6 @@ url: "https://thenetisvastandinfinite.com"
 
 issues_dir: .
 attachments_dir: ../Attachments
-theme: default
 
 web_hosting:
   provider: cloudflare-pages
@@ -275,7 +272,6 @@ describe("loadConfig", () => {
 name: "Test Newsletter"
 url: "https://example.com"
 issues_dir: .
-theme: default
 web_hosting:
   provider: cloudflare-pages
   project: my-newsletter
@@ -302,7 +298,6 @@ env:
 name: "Test Newsletter"
 url: "https://example.com"
 issues_dir: .
-theme: default
 web_hosting:
   provider: cloudflare-pages
   project: my-newsletter
@@ -332,7 +327,6 @@ env:
 name: "Test Newsletter"
 url: "https://example.com"
 issues_dir: .
-theme: default
 web_hosting:
   provider: cloudflare-pages
   project: my-newsletter
@@ -365,7 +359,6 @@ name: "Test Newsletter"
 url: "https://example.com"
 issues_dir: .
 attachments_dir: ../Attachments
-theme: default
 web_hosting:
   provider: cloudflare-pages
   project: my-newsletter
@@ -403,8 +396,6 @@ const ConfigSchema = z.object({
   url: z.string().url(),
   issues_dir: z.string().default("."),
   attachments_dir: z.string().optional(),
-  theme: z.string().default("default"),
-  theme_options: z.record(z.string(), z.string()).optional(),
   web_hosting: z.object({
     provider: z.literal("cloudflare-pages"),
     project: z.string(),
@@ -1245,37 +1236,18 @@ footer {
 This renders a single issue page as a complete HTML document.
 
 ```typescript
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
 import type { IssueProps } from "../../src/types.js";
 
-// Read built-in CSS. At runtime, __dirname is the themes/default dir.
-function getStyles(config: IssueProps["config"]): string {
-  const builtinCss = readFileSync(
+function getStyles(): string {
+  return readFileSync(
     new URL("styles.css", import.meta.url).pathname,
     "utf8"
   );
-
-  // Apply theme_options as CSS variable overrides
-  const opts = config.theme_options ?? {};
-  const overrides = [
-    opts.accent_color ? `  --accent: ${opts.accent_color};` : null,
-    opts.font_family ? `  --font-family: ${opts.font_family};` : null,
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  const overrideBlock = overrides ? `:root {\n${overrides}\n}` : "";
-
-  // User override: ./themes/default/styles.css in config dir
-  const userCssPath = join(config.configDir, "themes", "default", "styles.css");
-  const userCss = existsSync(userCssPath) ? readFileSync(userCssPath, "utf8") : "";
-
-  return [builtinCss, overrideBlock, userCss].filter(Boolean).join("\n\n");
 }
 
 export function WebPage({ title, issue, content, config }: IssueProps): string {
-  const styles = getStyles(config);
+  const styles = getStyles();
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1307,8 +1279,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
 This renders the archive/home page listing all issues.
 
 ```typescript
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
 import type { SiteConfig, IssueData } from "../../src/types.js";
 
 interface IndexProps {
@@ -1316,35 +1287,16 @@ interface IndexProps {
   config: SiteConfig;
 }
 
-function getStyles(config: SiteConfig): string {
-  const builtinCss = readFileSync(
+function getStyles(): string {
+  return readFileSync(
     new URL("styles.css", import.meta.url).pathname,
     "utf8"
   );
-
-  const opts = config.theme_options ?? {};
-  const overrides = [
-    opts.accent_color ? `  --accent: ${opts.accent_color};` : null,
-    opts.font_family ? `  --font-family: ${opts.font_family};` : null,
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  const overrideBlock = overrides ? `:root {\n${overrides}\n}` : "";
-
-  const userCssPath = join(config.configDir, "themes", "default", "styles.css");
-  const userCss = existsSync(userCssPath) ? readFileSync(userCssPath, "utf8") : "";
-
-  return [builtinCss, overrideBlock, userCss].filter(Boolean).join("\n\n");
 }
 
 export function IndexPage({ issues, config }: IndexProps): string {
-  const styles = getStyles(config);
+  const styles = getStyles();
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
-
-  const logoHtml = config.theme_options?.logo_url
-    ? `<img src="${config.theme_options.logo_url}" alt="${config.name}" style="height:40px;margin-bottom:0.5rem;">`
-    : "";
 
   const listItems = sorted
     .map(
@@ -1367,7 +1319,6 @@ export function IndexPage({ issues, config }: IndexProps): string {
 <body>
   <div class="container">
     <header>
-      ${logoHtml}
       <a class="site-name" href="/">${config.name}</a>
     </header>
     <main>
@@ -1389,9 +1340,6 @@ Plain function returning email-safe HTML. Uses inline styles for cross-client co
 import type { IssueProps } from "../../src/types.js";
 
 export function EmailPage({ title, issue, content, config }: IssueProps): string {
-  const accentColor = config.theme_options?.accent_color ?? "#2563eb";
-  const fontFamily = config.theme_options?.font_family ?? "Georgia, 'Times New Roman', serif";
-
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1403,7 +1351,7 @@ export function EmailPage({ title, issue, content, config }: IssueProps): string
   <style>body,table,td{font-family:Arial,Helvetica,sans-serif!important}</style>
   <![endif]-->
 </head>
-<body style="margin:0;padding:0;background-color:#ffffff;font-family:${fontFamily};color:#1a1a1a;line-height:1.7;">
+<body style="margin:0;padding:0;background-color:#ffffff;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;line-height:1.7;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
     <tr>
       <td align="center" style="padding:0;">
@@ -1426,7 +1374,7 @@ export function EmailPage({ title, issue, content, config }: IssueProps): string
             <td style="border-top:1px solid #e5e7eb;padding-top:24px;margin-top:32px;">
               <p style="font-size:13px;color:#6b7280;text-align:center;margin:0;">
                 You're receiving this because you subscribed to ${config.name}.
-                <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:${accentColor};">Unsubscribe</a>
+                <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#2563eb;">Unsubscribe</a>
               </p>
             </td>
           </tr>
@@ -1505,7 +1453,6 @@ describe("runBuild", () => {
 name: "Test Newsletter"
 url: "https://example.com"
 issues_dir: ./issues
-theme: default
 web_hosting:
   provider: cloudflare-pages
   project: my-newsletter
@@ -1887,11 +1834,6 @@ url: "https://example.com"
 issues_dir: .
 # attachments_dir: ../Attachments
 
-theme: default
-# theme_options:
-#   accent_color: "#2563eb"
-#   font_family: "Georgia, serif"
-
 web_hosting:
   provider: cloudflare-pages
   project: my-newsletter
@@ -2092,27 +2034,22 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
 
 ```typescript
 import { join } from "node:path";
-import { loadConfig } from "../pipeline/config.js";
 import { runBuild } from "./build.js";
 
 interface PreviewOptions {
   configDir: string;
-  issueNumber?: number; // if provided, open that issue directly
 }
 
 export async function runPreview(options: PreviewOptions): Promise<void> {
-  const { configDir, issueNumber } = options;
+  const { configDir } = options;
 
   // Build with drafts included
   await runBuild({ configDir, includeDrafts: true });
 
-  const config = await loadConfig(configDir);
   const websiteDir = join(configDir, "output", "website");
 
-  let port = 4000;
-
   const server = Bun.serve({
-    port,
+    port: 4000,
     fetch(req) {
       const url = new URL(req.url);
       let pathname = url.pathname;
@@ -2131,8 +2068,7 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
     },
   });
 
-  const targetPath = issueNumber ? `/issues/${issueNumber}/` : "/";
-  const url = `http://localhost:${server.port}${targetPath}`;
+  const url = `http://localhost:${server.port}/`;
 
   console.log(`Preview server running at ${url}`);
   console.log("Press Ctrl+C to stop.");
@@ -2185,7 +2121,7 @@ async function main(): Promise<void> {
 Commands:
   init              Generate laughing-man.yaml in the current directory
   build             Validate + build site and email HTML
-  preview [issue]   Build (including drafts) + start local preview server
+  preview           Build (including drafts) + start local preview server
   deploy            Deploy output/website/ to Cloudflare Pages
   send <issue>      Send an issue via Resend Broadcast
     --yes           Skip confirmation prompt (for CI)
@@ -2194,7 +2130,6 @@ Examples:
   laughing-man init
   laughing-man build
   laughing-man preview
-  laughing-man preview 2
   laughing-man deploy
   laughing-man send 1
   laughing-man send 1 --yes
@@ -2215,11 +2150,7 @@ Examples:
       }
 
       case "preview": {
-        const issueArg = args[1];
-        const issueNumber = issueArg && /^\d+$/.test(issueArg)
-          ? parseInt(issueArg, 10)
-          : undefined;
-        await runPreview({ configDir, issueNumber });
+        await runPreview({ configDir });
         break;
       }
 
@@ -2324,7 +2255,6 @@ name: "The Net is Vast and Infinite"
 url: "https://thenetisvastandinfinite.com"
 
 issues_dir: "/Users/vinta/Projects/mensab/vault/Posts/The Net is Vast and Infinite/drafts"
-theme: default
 
 web_hosting:
   provider: cloudflare-pages
@@ -2342,7 +2272,6 @@ mkdir -p /tmp/lm-smoke && cat > /tmp/lm-smoke/laughing-man.yaml << 'YAML'
 name: "The Net is Vast and Infinite"
 url: "https://thenetisvastandinfinite.com"
 issues_dir: "/Users/vinta/Projects/mensab/vault/Posts/The Net is Vast and Infinite/drafts"
-theme: default
 web_hosting:
   provider: cloudflare-pages
   project: laughing-man
@@ -2386,65 +2315,3 @@ If the smoke test reveals bugs (missing image paths, encoding issues with non-AS
 
 Use the commit skill.
 
----
-
-## Self-Review
-
-### Spec coverage check
-
-| Spec requirement | Covered by |
-|---|---|
-| `laughing-man init` generates config | Task 9 |
-| `laughing-man build` validates + generates output | Task 7 |
-| `laughing-man preview` includes drafts + local server | Task 10 |
-| `laughing-man preview 2` (specific issue) | Task 10 |
-| `laughing-man send 1` creates + sends Resend Broadcast | Task 10 |
-| `laughing-man send 1 --yes` skips prompt | Task 10 |
-| Config: `laughing-man.yaml` with all documented fields | Tasks 1, 2 |
-| Env var override for Resend secrets | Task 2 |
-| `.env` file loading from config dir | Task 2 |
-| Frontmatter: `issue`, `status` required fields | Task 4 |
-| Frontmatter: `status: draft` or `ready` | Tasks 3, 4 |
-| Title extracted from first `# heading` | Task 4 |
-| Missing required field = build error with filename | Task 4 |
-| Duplicate `issue` number = build error naming both files | Tasks 3, 7 |
-| `status: draft` excluded from `build`/`send` | Task 7 |
-| `status: draft` included in `preview` | Task 7 |
-| Image resolution: relative to markdown file, then `attachments_dir` | Task 5 |
-| Image copy to `output/website/images/<issue>/` | Task 5 |
-| Web HTML: site-relative image src | Task 5 |
-| Email HTML: absolute URL image src | Task 5 |
-| Missing image = build error | Task 5 |
-| Email template with inline styles | Task 6 |
-| Web + index templates | Task 6 |
-| Theme CSS + config token overrides | Task 6 |
-| User CSS override at `./themes/default/styles.css` | Task 6 |
-| `{{{RESEND_UNSUBSCRIBE_URL}}}` in email | Task 6 |
-| Duplicate send prevention via Resend API query | Task 10 (`send.ts`) |
-| `status: draft` = refuse to send | Task 10 (`send.ts`) |
-| Build check: requires `output/email/<issue>.html` | Task 10 (`send.ts`) |
-| Confirmation prompt before send | Task 10 (`send.ts`) |
-| `--yes` flag skips prompt | Task 10 (`send.ts`) |
-| `laughing-man deploy` uploads to Cloudflare Pages | Task 10 |
-| GitHub Actions workflow in README | Not automated -- add to README separately |
-| Provider logic isolated in `src/providers/` | Task 8 |
-| No local state file | Task 8 (state queried from Resend API) |
-| Open source design: config-driven, no hardcoded data | All tasks |
-
-**Gap found:** The spec mentions a GitHub Actions workflow should be documented in the README. This is documentation, not code -- handle it manually after the smoke test passes by adding a CI section to `README.md`.
-
-### Placeholder scan
-
-No TBDs, TODOs, or "implement later" notes found. All code steps contain real implementation.
-
-### Type consistency check
-
-- `IssueData` defined in `types.ts` Task 1, used in Tasks 3, 4, 7
-- `SiteConfig` defined in `types.ts` Task 1, used in Tasks 2, 6, 7, 10
-- `IssueProps` defined in `types.ts` Task 1, used in Tasks 6, 7
-- `processImages` params: `markdownFilePath` (string) consistent across Tasks 5 and 7
-- `runBuild({ configDir, includeDrafts })` consistent across Tasks 7 and 10 (`preview.ts` calls it)
-- `createResendProvider(resend)` returns `ResendProvider` interface -- used consistently in Tasks 8 and 10
-- `WebPage`, `IndexPage`, `EmailPage` are all synchronous string-returning functions -- consistent with how Task 7 calls them
-
-All types, method names, and property names are consistent.
