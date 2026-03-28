@@ -111,6 +111,28 @@ Content.
     const result = await parseIssueFile(filePath);
     expect(result.title).toBe("First Heading");
   });
+
+  it("ignores # headings inside fenced code blocks", async () => {
+    const content = `---
+issue: 1
+status: ready
+---
+
+\`\`\`bash
+# install dependencies
+bun install
+\`\`\`
+
+# Real Title
+
+Content.
+`;
+    const filePath = join(tmpDir, "issue-1.md");
+    writeFileSync(filePath, content);
+
+    const result = await parseIssueFile(filePath);
+    expect(result.title).toBe("Real Title");
+  });
 });
 
 describe("scanIssuesDir", () => {

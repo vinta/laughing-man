@@ -103,4 +103,22 @@ describe("processImages", () => {
       })
     ).rejects.toThrow("missing.jpg");
   });
+
+  it("throws on filename collision from different sources", async () => {
+    // Same filename in both issues dir and attachments dir, different content
+    writeFileSync(join(tmpDir, "issues", "photo.jpg"), "image-version-1");
+    writeFileSync(join(tmpDir, "Attachments", "photo.jpg"), "image-version-2-longer");
+
+    const html = `<img src="photo.jpg"><img src="Attachments/photo.jpg">`;
+    await expect(
+      processImages({
+        html,
+        issueNumber: 1,
+        markdownFilePath: join(tmpDir, "issues", "issue-1.md"),
+        attachmentsDir: join(tmpDir, "Attachments"),
+        outputDir,
+        siteUrl: "https://example.com",
+      })
+    ).rejects.toThrow("Filename collision");
+  });
 });

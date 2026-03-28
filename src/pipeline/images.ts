@@ -75,9 +75,21 @@ export async function processImages(
     }
 
     const filename = basename(resolvedPath);
+    const destPath = join(imageOutputDir, filename);
 
     mkdirSync(imageOutputDir, { recursive: true });
-    copyFileSync(resolvedPath, join(imageOutputDir, filename));
+
+    if (existsSync(destPath)) {
+      const existingStat = Bun.file(destPath);
+      const newStat = Bun.file(resolvedPath);
+      if (existingStat.size !== newStat.size) {
+        throw new Error(
+          `Filename collision: '${filename}' in issue ${issueNumber} resolves to different source files.`
+        );
+      }
+    }
+
+    copyFileSync(resolvedPath, destPath);
 
     const encodedFilename = encodeURIComponent(filename);
     const webSrc = `/images/${issueNumber}/${encodedFilename}`;
