@@ -50,6 +50,7 @@ export async function processImages(
   const imageOutputDir = join(outputDir, "images", String(issueNumber));
   let webHtml = html;
   let emailHtml = html;
+  const copiedImages = new Map<string, string>();
 
   const matches = [...html.matchAll(imgPattern)];
 
@@ -77,19 +78,18 @@ export async function processImages(
     const filename = basename(resolvedPath);
     const destPath = join(imageOutputDir, filename);
 
-    mkdirSync(imageOutputDir, { recursive: true });
-
-    if (existsSync(destPath)) {
-      const existingStat = Bun.file(destPath);
-      const newStat = Bun.file(resolvedPath);
-      if (existingStat.size !== newStat.size) {
-        throw new Error(
-          `Filename collision: '${filename}' in issue ${issueNumber} resolves to different source files.`
-        );
-      }
+    const previousSource = copiedImages.get(filename);
+    if (previousSource && previousSource !== resolvedPath) {
+      throw new Error(
+        `Filename collision: '${filename}' in issue ${issueNumber} resolves to different source files.`
+      );
     }
 
-    copyFileSync(resolvedPath, destPath);
+    if (!previousSource) {
+      mkdirSync(imageOutputDir, { recursive: true });
+      copyFileSync(resolvedPath, destPath);
+      copiedImages.set(filename, resolvedPath);
+    }
 
     const encodedFilename = encodeURIComponent(filename);
     const webSrc = `/images/${issueNumber}/${encodedFilename}`;
