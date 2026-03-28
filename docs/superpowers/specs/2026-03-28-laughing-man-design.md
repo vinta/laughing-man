@@ -14,11 +14,12 @@ A CLI tool that turns a folder of markdown documents into a newsletter: a static
 laughing-man init              # Generate laughing-man.yaml
 laughing-man build             # Validate + generate site + email HTML to output/
 laughing-man preview           # Build + start local server for preview
+laughing-man deploy            # Deploy output/website/ to Cloudflare Pages
 laughing-man send 1            # Send issue 1 via Resend Broadcast
 laughing-man send 1 --yes      # Non-interactive mode (for CI)
 ```
 
-`build` and `send` are separate, composable steps. No monolithic `publish` command. Deployment to Cloudflare Pages is handled by CI (see CI Support), not a CLI command.
+`build`, `deploy`, and `send` are separate, composable steps. No monolithic `publish` command. Run them independently or chain them in CI.
 
 ## Config
 
@@ -43,11 +44,11 @@ email_hosting:
 env:
   resend_api_key: "re_xxxxx"              # or RESEND_API_KEY from environment variables
   resend_audience_id: "aud_xxxxx"         # or RESEND_AUDIENCE_ID from environment variables
-  cloudflare_api_token: "cf_xxxxx"        # or CLOUDFLARE_API_TOKEN from environment variables
-  cloudflare_account_id: "xxxxx"          # or CLOUDFLARE_ACCOUNT_ID from environment variables
 ```
 
-**Environment variable override:** Values in the `env` section can be overridden by environment variables. `RESEND_API_KEY` overrides `resend_api_key`, `CLOUDFLARE_API_TOKEN` overrides `cloudflare_api_token`, etc. The tool loads `.env` from the newsletter directory if it exists, so locally you keep secrets in `.env` (gitignored) and in CI inject them as real env vars.
+**Environment variable override:** Values in the `env` section can be overridden by environment variables. `RESEND_API_KEY` overrides `resend_api_key`, etc. The tool loads `.env` from the newsletter directory if it exists, so locally you keep secrets in `.env` (gitignored) and in CI inject them as real env vars.
+
+Cloudflare credentials are not in the config. Wrangler handles its own auth: locally via `wrangler login` (OAuth), in CI via `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` env vars passed directly to the workflow.
 
 A `laughing-man.example.yaml` ships with the package for open source reference.
 
@@ -86,7 +87,7 @@ Filenames are arbitrary. The tool discovers issues by scanning `issues_dir` for 
 
 ### Status field
 
-- `draft`: included in `preview`, excluded from `build`/`send`. Work in progress.
+- `draft`: included in `preview`, excluded from `build`/`deploy`/`send`. Work in progress.
 - `ready`: included everywhere. Ready to publish.
 
 ## Images
@@ -196,6 +197,16 @@ interface IssueProps {
 - Opens the browser automatically
 - Includes `status: draft` issues so you can preview work in progress
 
+## Deploy
+
+`laughing-man deploy` uploads `output/website/` to Cloudflare Pages via `wrangler pages deploy`.
+
+Requires `wrangler` to be installed (`bun add -D wrangler` or globally). Wrangler handles its own authentication:
+- **Locally:** Run `wrangler login` once. OAuth token is stored and auto-refreshed.
+- **In CI:** Set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as env vars.
+
+Requires `build` to have been run first. If `output/website/` does not exist, errors with a message to run `build`.
+
 ## Send
 
 `laughing-man send <issue-number>` sends an issue via Resend Broadcasts:
@@ -269,6 +280,7 @@ laughing-man/
       init.ts
       build.ts
       preview.ts
+      deploy.ts
       send.ts
     pipeline/
       markdown.ts        # Markdown parsing + rendering

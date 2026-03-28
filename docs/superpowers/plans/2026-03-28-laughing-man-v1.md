@@ -4,7 +4,7 @@
 
 **Goal:** Build a CLI tool that turns a folder of Markdown files into a newsletter — a static archive site on Cloudflare Pages and email delivery via Resend Broadcasts.
 
-**Architecture:** The tool is a Bun+TypeScript npm package invoked via `bunx laughing-man`. A pipeline reads Markdown from the user's directory, validates frontmatter, renders HTML via plain template functions, copies images, and writes output to `output/`. Separate composable commands (`build`, `send`) run independently so CI can chain or retry them. Deployment to Cloudflare Pages is handled by CI via `cloudflare/wrangler-action`, not a CLI command.
+**Architecture:** The tool is a Bun+TypeScript npm package invoked via `bunx laughing-man`. A pipeline reads Markdown from the user's directory, validates frontmatter, renders HTML via plain template functions, copies images, and writes output to `output/`. Separate composable commands (`build`, `deploy`, `send`) run independently so CI can chain or retry them.
 
 **Tech Stack:** Bun 1.x, TypeScript, zod 4.3.6, @11ty/gray-matter 2.0.1, marked 17.0.5, resend 6.9.4
 
@@ -26,6 +26,7 @@ laughing-man/
       init.ts                 # Writes laughing-man.yaml + .gitignore entry
       build.ts                # Orchestrates the full build pipeline
       preview.ts              # Build (draft-inclusive) + Bun.serve local server
+      deploy.ts               # Deploy output/website/ to Cloudflare Pages via wrangler
       send.ts                 # Sends an issue via Resend Broadcasts
     pipeline/
       config.ts               # Load + parse laughing-man.yaml, apply env overrides
@@ -177,8 +178,6 @@ export interface SiteConfig {
   env: {
     resend_api_key?: string;
     resend_audience_id?: string;
-    cloudflare_api_token?: string;
-    cloudflare_account_id?: string;
   };
   // Internal: resolved at load time
   configDir: string;            // Directory containing laughing-man.yaml
@@ -244,8 +243,6 @@ The config loader reads `laughing-man.yaml` from the current working directory (
 |---|---|
 | `RESEND_API_KEY` | `env.resend_api_key` |
 | `RESEND_AUDIENCE_ID` | `env.resend_audience_id` |
-| `CLOUDFLARE_API_TOKEN` | `env.cloudflare_api_token` |
-| `CLOUDFLARE_ACCOUNT_ID` | `env.cloudflare_account_id` |
 
 The loader also reads `.env` from the config directory using `Bun.file` + a simple line parser (no dotenv dependency needed — Bun loads `.env` automatically when you use `process.env` in Bun, but we read the config file manually so we must handle this ourselves).
 
@@ -1943,10 +1940,11 @@ Use the commit skill.
 
 ---
 
-## Task 10: `send` and `preview` Commands
+## Task 10: `send`, `deploy`, and `preview` Commands
 
 **Files:**
 - Create: `src/commands/send.ts`
+- Create: `src/commands/deploy.ts`
 - Create: `src/commands/preview.ts`
 
 These are thin orchestrators -- the real logic lives in the providers and pipeline.
@@ -2039,7 +2037,58 @@ export async function runSend(options: SendOptions): Promise<void> {
 }
 ```
 
-- [ ] **Step 2: Implement `src/commands/preview.ts`**
+- [ ] **Step 2: Implement `src/commands/deploy.ts`**
+
+```typescript
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { loadConfig } from "../pipeline/config.js";
+
+interface DeployOptions {
+  configDir: string;
+}
+
+export async function runDeploy(options: DeployOptions): Promise<void> {
+  const { configDir } = options;
+
+  const config = await loadConfig(configDir);
+
+  const websiteDir = join(configDir, "output", "website");
+  if (!existsSync(websiteDir)) {
+    throw new Error(
+      `output/website/ not found. Run 'laughing-man build' first.`
+    );
+  }
+
+  // Check wrangler is available
+  const which = Bun.spawnSync(["which", "wrangler"]);
+  if (which.exitCode !== 0) {
+    throw new Error(
+      "wrangler not found. Install it with: bun add -D wrangler\n" +
+      "Then authenticate with: npx wrangler login"
+    );
+  }
+
+  console.log(`Deploying to Cloudflare Pages (${config.web_hosting.project})...`);
+
+  const proc = Bun.spawn([
+    "npx", "wrangler", "pages", "deploy", websiteDir,
+    `--project-name=${config.web_hosting.project}`,
+  ], {
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+
+  const exitCode = await proc.exited;
+  if (exitCode !== 0) {
+    throw new Error(`wrangler pages deploy failed with exit code ${exitCode}`);
+  }
+
+  console.log("Deploy complete.");
+}
+```
+
+- [ ] **Step 3: Implement `src/commands/preview.ts`**
 
 ```typescript
 import { join } from "node:path";
@@ -2121,6 +2170,7 @@ Parses `process.argv` and dispatches to the correct command. No external CLI arg
 import { runInit } from "./commands/init.js";
 import { runBuild } from "./commands/build.js";
 import { runPreview } from "./commands/preview.js";
+import { runDeploy } from "./commands/deploy.js";
 import { runSend } from "./commands/send.js";
 
 const args = process.argv.slice(2);
@@ -2136,6 +2186,7 @@ Commands:
   init              Generate laughing-man.yaml in the current directory
   build             Validate + build site and email HTML
   preview [issue]   Build (including drafts) + start local preview server
+  deploy            Deploy output/website/ to Cloudflare Pages
   send <issue>      Send an issue via Resend Broadcast
     --yes           Skip confirmation prompt (for CI)
 
@@ -2144,6 +2195,7 @@ Examples:
   laughing-man build
   laughing-man preview
   laughing-man preview 2
+  laughing-man deploy
   laughing-man send 1
   laughing-man send 1 --yes
 `);
@@ -2168,6 +2220,11 @@ Examples:
           ? parseInt(issueArg, 10)
           : undefined;
         await runPreview({ configDir, issueNumber });
+        break;
+      }
+
+      case "deploy": {
+        await runDeploy({ configDir });
         break;
       }
 
@@ -2368,7 +2425,7 @@ Use the commit skill.
 | Build check: requires `output/email/<issue>.html` | Task 10 (`send.ts`) |
 | Confirmation prompt before send | Task 10 (`send.ts`) |
 | `--yes` flag skips prompt | Task 10 (`send.ts`) |
-| Cloudflare Pages deployment via CI | Spec CI section (not a CLI command) |
+| `laughing-man deploy` uploads to Cloudflare Pages | Task 10 |
 | GitHub Actions workflow in README | Not automated -- add to README separately |
 | Provider logic isolated in `src/providers/` | Task 8 |
 | No local state file | Task 8 (state queried from Resend API) |
