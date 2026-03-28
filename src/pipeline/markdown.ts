@@ -8,8 +8,8 @@ import type { IssueData } from "../types.js";
 const FrontmatterSchema = z.object({
   issue: z.number({
     error: (iss) =>
-      iss.input === undefined ? "issue is required" : "issue must be a number",
-  }),
+      iss.input === undefined ? "issue is required" : "issue must be a positive integer",
+  }).int().positive(),
   status: z.enum(["draft", "ready"], {
     error: (iss) =>
       iss.input === undefined

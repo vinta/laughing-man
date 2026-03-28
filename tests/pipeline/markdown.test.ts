@@ -78,6 +78,48 @@ status: published
     await expect(parseIssueFile(filePath)).rejects.toThrow("bad.md");
   });
 
+  it("throws on non-integer issue number", async () => {
+    const content = `---
+issue: 1.5
+status: ready
+---
+
+# Title
+`;
+    const filePath = join(tmpDir, "bad.md");
+    writeFileSync(filePath, content);
+
+    await expect(parseIssueFile(filePath)).rejects.toThrow("bad.md");
+  });
+
+  it("throws on zero issue number", async () => {
+    const content = `---
+issue: 0
+status: ready
+---
+
+# Title
+`;
+    const filePath = join(tmpDir, "bad.md");
+    writeFileSync(filePath, content);
+
+    await expect(parseIssueFile(filePath)).rejects.toThrow("bad.md");
+  });
+
+  it("throws on negative issue number", async () => {
+    const content = `---
+issue: -1
+status: ready
+---
+
+# Title
+`;
+    const filePath = join(tmpDir, "bad.md");
+    writeFileSync(filePath, content);
+
+    await expect(parseIssueFile(filePath)).rejects.toThrow("bad.md");
+  });
+
   it("sets title to empty string if no # heading found", async () => {
     const content = `---
 issue: 1
