@@ -50,7 +50,7 @@ export async function handleSubscribe(
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const body = (await context.request.json()) as SubscribeBody;
-    return handleSubscribe(body, context.env);
+    return await handleSubscribe(body, context.env);
   } catch {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }

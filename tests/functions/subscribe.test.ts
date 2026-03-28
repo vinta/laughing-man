@@ -1,5 +1,5 @@
 import { describe, expect, it, mock } from "bun:test";
-import { handleSubscribe } from "../../functions/api/subscribe";
+import { handleSubscribe, onRequestPost } from "../../functions/api/subscribe";
 
 describe("handleSubscribe", () => {
   const mockEnv = {
@@ -66,5 +66,34 @@ describe("handleSubscribe", () => {
   it("returns 400 if request body is not JSON", async () => {
     const res = await handleSubscribe(null as unknown as { email: string }, mockEnv);
     expect(res.status).toBe(400);
+  });
+});
+
+describe("onRequestPost", () => {
+  function makeContext(body: unknown, env = { RESEND_API_KEY: "re_test", RESEND_AUDIENCE_ID: "aud_test" }) {
+    return {
+      request: new Request("https://example.com/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+      env,
+    } as unknown as Parameters<typeof onRequestPost>[0];
+  }
+
+  it("returns JSON error when fetch throws a network error", async () => {
+    const originalFetch = globalThis.fetch;
+    try {
+      globalThis.fetch = mock(async () => {
+        throw new Error("Network failure");
+      }) as unknown as typeof fetch;
+
+      const res = await onRequestPost(makeContext({ email: "test@example.com" }));
+      expect(res.status).toBe(400);
+      const body = (await res.json()) as Record<string, string>;
+      expect(body.error).toBeDefined();
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 });
