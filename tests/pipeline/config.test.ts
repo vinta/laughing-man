@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import { loadConfig } from "../../src/pipeline/config";
-import { mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import os from "node:os";
 
@@ -8,8 +8,7 @@ describe("loadConfig", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = join(os.tmpdir(), `lm-test-${Date.now()}`);
-    mkdirSync(tmpDir, { recursive: true });
+    tmpDir = mkdtempSync(join(os.tmpdir(), "lm-test-"));
   });
 
   afterEach(() => {
@@ -62,13 +61,14 @@ env:
     process.env.RESEND_API_KEY = "re_from_env";
     process.env.RESEND_AUDIENCE_ID = "aud_from_env";
 
-    const config = await loadConfig(tmpDir);
-
-    delete process.env.RESEND_API_KEY;
-    delete process.env.RESEND_AUDIENCE_ID;
-
-    expect(config.env.resend_api_key).toBe("re_from_env");
-    expect(config.env.resend_audience_id).toBe("aud_from_env");
+    try {
+      const config = await loadConfig(tmpDir);
+      expect(config.env.resend_api_key).toBe("re_from_env");
+      expect(config.env.resend_audience_id).toBe("aud_from_env");
+    } finally {
+      delete process.env.RESEND_API_KEY;
+      delete process.env.RESEND_AUDIENCE_ID;
+    }
   });
 
   it("loads .env file from config directory", async () => {

@@ -38,6 +38,7 @@ function parseDotEnv(content: string): Record<string, string> {
 }
 
 export async function loadConfig(configDir: string): Promise<SiteConfig> {
+  configDir = resolve(configDir);
   const yamlPath = join(configDir, "laughing-man.yaml");
 
   if (!existsSync(yamlPath)) {
