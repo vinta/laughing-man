@@ -40,8 +40,11 @@ laughing-man/
     default/
       email.ts                # Email HTML template (plain function, no React)
       web.ts                  # Individual issue web page template
-      index.ts                # Archive/home page template
+      index.ts                # Archive/home page template (includes subscribe form)
       styles.css              # Base styles (loaded by web templates)
+  functions/
+    api/
+      subscribe.ts            # Pages Function: POST /api/subscribe
   tests/
     pipeline/
       config.test.ts
@@ -50,6 +53,8 @@ laughing-man/
       images.test.ts
     commands/
       build.test.ts
+    functions/
+      subscribe.test.ts
     providers/
       resend.test.ts
   package.json
@@ -1142,6 +1147,9 @@ body {
 }
 
 header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   border-bottom: 2px solid var(--border);
   padding-bottom: 1.5rem;
   margin-bottom: 2.5rem;
@@ -1222,6 +1230,62 @@ code {
   margin-top: 0.25rem;
 }
 
+.subscribe-link {
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.subscribe-section {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.subscribe-section h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+}
+
+.subscribe-form {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 400px;
+}
+
+.subscribe-form input[type="email"] {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.subscribe-form button {
+  padding: 0.5rem 1.25rem;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.subscribe-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.subscribe-message {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.subscribe-message.success { color: #16a34a; }
+.subscribe-message.error { color: #dc2626; }
+
 footer {
   margin-top: 3rem;
   padding-top: 1.5rem;
@@ -1276,7 +1340,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
 
 - [ ] **Step 3: Write `themes/default/index.ts`**
 
-This renders the archive/home page listing all issues.
+This renders the archive/home page listing all issues, with a subscribe form.
 
 ```typescript
 import { readFileSync } from "node:fs";
@@ -1320,13 +1384,52 @@ export function IndexPage({ issues, config }: IndexProps): string {
   <div class="container">
     <header>
       <a class="site-name" href="/">${config.name}</a>
+      <a class="subscribe-link" href="#subscribe">Subscribe</a>
     </header>
     <main>
+      <section id="subscribe" class="subscribe-section">
+        <h2>Subscribe</h2>
+        <form class="subscribe-form" id="subscribe-form">
+          <input type="email" name="email" placeholder="your@email.com" required>
+          <button type="submit">Subscribe</button>
+        </form>
+        <p class="subscribe-message" id="subscribe-message" hidden></p>
+      </section>
       <ul class="issue-list">
         ${listItems}
       </ul>
     </main>
   </div>
+  <script>
+    document.getElementById('subscribe-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const msg = document.getElementById('subscribe-message');
+      const email = form.email.value;
+      form.querySelector('button').disabled = true;
+      try {
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          msg.textContent = 'You are subscribed!';
+          msg.className = 'subscribe-message success';
+          form.reset();
+        } else {
+          msg.textContent = data.error || 'Something went wrong.';
+          msg.className = 'subscribe-message error';
+        }
+      } catch {
+        msg.textContent = 'Something went wrong.';
+        msg.className = 'subscribe-message error';
+      }
+      msg.hidden = false;
+      form.querySelector('button').disabled = false;
+    });
+  </script>
 </body>
 </html>`;
 }
@@ -2312,6 +2415,242 @@ Expected: browser opens `http://localhost:4000`, shows the newsletter archive.
 If the smoke test reveals bugs (missing image paths, encoding issues with non-ASCII filenames, etc.), fix them, add a regression test for each, then re-run `bun test` to confirm all tests still pass.
 
 - [ ] **Step 8: Commit any fixes**
+
+Use the commit skill.
+
+---
+
+## Task 13: Subscribe Pages Function
+
+**Files:**
+- Create: `functions/api/subscribe.ts`
+- Create: `tests/functions/subscribe.test.ts`
+
+A Cloudflare Pages Function that handles `POST /api/subscribe`. Validates the email, calls Resend's Contacts API to add the subscriber to the audience, and returns JSON.
+
+The function runs in the Cloudflare Workers runtime. It uses `fetch()` directly against the Resend REST API (no SDK). Environment variables `RESEND_API_KEY` and `RESEND_AUDIENCE_ID` are read from the Pages Function's `env` binding.
+
+- [ ] **Step 1: Write the failing tests**
+
+```typescript
+// tests/functions/subscribe.test.ts
+import { describe, expect, it, mock, beforeEach } from "bun:test";
+
+// We test the handler logic directly, simulating the Pages Function signature.
+// In Cloudflare Pages Functions, the handler receives a context object with
+// request, env, etc. We simulate that here.
+
+// Extract the handler logic into a testable function
+import { handleSubscribe } from "../../functions/api/subscribe";
+
+describe("handleSubscribe", () => {
+  const mockEnv = {
+    RESEND_API_KEY: "re_test_key",
+    RESEND_AUDIENCE_ID: "aud_test_id",
+  };
+
+  it("returns 400 if email is missing", async () => {
+    const res = await handleSubscribe({ email: "" }, mockEnv);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toContain("email");
+  });
+
+  it("returns 400 if email is invalid", async () => {
+    const res = await handleSubscribe({ email: "not-an-email" }, mockEnv);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toContain("email");
+  });
+
+  it("returns 200 on successful subscribe", async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = mock(async () =>
+      new Response(JSON.stringify({ id: "contact_123" }), { status: 200 })
+    );
+
+    const res = await handleSubscribe({ email: "test@example.com" }, mockEnv);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+
+    // Verify the Resend API was called correctly
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://api.resend.com/audiences/aud_test_id/contacts",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Authorization: "Bearer re_test_key",
+        }),
+      })
+    );
+
+    globalThis.fetch = originalFetch;
+  });
+
+  it("returns 500 if Resend API returns an error", async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = mock(async () =>
+      new Response(JSON.stringify({ message: "Invalid API key" }), { status: 403 })
+    );
+
+    const res = await handleSubscribe({ email: "test@example.com" }, mockEnv);
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toBeDefined();
+
+    globalThis.fetch = originalFetch;
+  });
+
+  it("returns 400 if request body is not JSON", async () => {
+    const res = await handleSubscribe(null as any, mockEnv);
+    expect(res.status).toBe(400);
+  });
+});
+```
+
+- [ ] **Step 2: Run tests to confirm they fail**
+
+```bash
+cd /Users/vinta/Projects/laughing-man && bun test tests/functions/subscribe.test.ts
+```
+
+Expected: FAIL -- `handleSubscribe` not found.
+
+- [ ] **Step 3: Implement `functions/api/subscribe.ts`**
+
+```typescript
+// Cloudflare Pages Function: POST /api/subscribe
+// Adds an email to the Resend audience via the REST API.
+
+interface Env {
+  RESEND_API_KEY: string;
+  RESEND_AUDIENCE_ID: string;
+}
+
+interface SubscribeBody {
+  email?: string;
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export async function handleSubscribe(
+  body: SubscribeBody | null,
+  env: Env
+): Promise<Response> {
+  if (!body || !body.email || typeof body.email !== "string") {
+    return Response.json({ error: "A valid email is required." }, { status: 400 });
+  }
+
+  const email = body.email.trim().toLowerCase();
+  if (!EMAIL_RE.test(email)) {
+    return Response.json({ error: "A valid email is required." }, { status: 400 });
+  }
+
+  const res = await fetch(
+    `https://api.resend.com/audiences/${env.RESEND_AUDIENCE_ID}/contacts`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    }
+  );
+
+  if (!res.ok) {
+    const error = await res.text();
+    return Response.json(
+      { error: "Failed to subscribe. Please try again." },
+      { status: 500 }
+    );
+  }
+
+  return Response.json({ ok: true });
+}
+
+// Pages Function entry point
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  try {
+    const body = await context.request.json();
+    return handleSubscribe(body, context.env);
+  } catch {
+    return Response.json({ error: "Invalid request." }, { status: 400 });
+  }
+};
+```
+
+- [ ] **Step 4: Run tests to confirm they pass**
+
+```bash
+cd /Users/vinta/Projects/laughing-man && bun test tests/functions/subscribe.test.ts
+```
+
+Expected: all tests pass.
+
+- [ ] **Step 5: Update `build` command to copy `functions/` to output**
+
+The `build` command needs to copy the `functions/` directory alongside `output/website/` so that `wrangler pages deploy` picks up both the static assets and the Pages Functions.
+
+In `src/commands/build.ts`, after writing all HTML output, add:
+
+```typescript
+// Copy functions/ to output for Pages Function deployment
+import { cpSync } from "node:fs";
+import { resolve } from "node:path";
+
+const functionsSource = resolve(import.meta.dirname, "../../functions");
+const functionsDest = join(outputDir, "website", "_functions");
+// Note: wrangler pages deploy looks for functions/ relative to the project,
+// not inside the output directory. The functions/ dir at the repo root is
+// picked up automatically. No copy needed if deploying from the repo root.
+```
+
+Actually, `wrangler pages deploy` with a `functions/` directory at the repo root picks up Pages Functions automatically. No changes to `build` are needed. Verify this in the smoke test.
+
+- [ ] **Step 6: Commit**
+
+Use the commit skill.
+
+---
+
+## Task 14: Subscribe Smoke Test
+
+Verify the subscribe form works end-to-end with the preview server and against the real Resend API.
+
+- [ ] **Step 1: Run `preview` and verify the subscribe form renders**
+
+```bash
+cd /tmp/lm-smoke && bun /Users/vinta/Projects/laughing-man/src/cli.ts preview
+```
+
+Expected: index page shows subscribe form with email input and button. Nav header has "Subscribe" link.
+
+- [ ] **Step 2: Test the form submission against the preview server**
+
+The preview server (Bun.serve) does not run Pages Functions. The form will submit to `/api/subscribe` which returns 404 in local preview. This is expected.
+
+To verify the Pages Function works, test it in isolation:
+
+```bash
+cd /Users/vinta/Projects/laughing-man && bun -e "
+import { handleSubscribe } from './functions/api/subscribe';
+const res = await handleSubscribe(
+  { email: 'test@example.com' },
+  { RESEND_API_KEY: process.env.RESEND_API_KEY, RESEND_AUDIENCE_ID: process.env.RESEND_AUDIENCE_ID }
+);
+console.log(res.status, await res.json());
+"
+```
+
+Expected: 200 `{ ok: true }` if env vars are set, or 500 if not (confirming the function runs).
+
+- [ ] **Step 3: Fix any issues found**
+
+Fix bugs, add regression tests, re-run `bun test`.
+
+- [ ] **Step 4: Commit any fixes**
 
 Use the commit skill.
 
