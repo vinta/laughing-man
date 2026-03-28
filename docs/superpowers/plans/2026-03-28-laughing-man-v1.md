@@ -92,7 +92,7 @@ Note: pin exact versions in `package.json` (no `^` or `~` prefixes). The `bun ad
 - [ ] **Step 3: Install dev dependencies**
 
 ```bash
-bun add -d typescript@^5 "@types/bun" "@types/node"
+bun add -d typescript@^5 "@types/bun" "@types/node" "@cloudflare/workers-types@^4"
 ```
 
 - [ ] **Step 4: Write `package.json`**
@@ -119,6 +119,7 @@ Replace the generated `package.json` entirely:
     "zod": "4.3.6"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4",
     "@types/bun": "latest",
     "@types/node": "latest",
     "typescript": "^5"
@@ -257,7 +258,7 @@ Actually: Bun automatically loads `.env` from the project root at startup. Since
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import { loadConfig } from "../../src/pipeline/config";
 import { mkdirSync, writeFileSync, rmSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import os from "node:os";
 
 describe("loadConfig", () => {
@@ -375,7 +376,7 @@ env: {}
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
 
     const config = await loadConfig(tmpDir);
-    expect(config.attachments_dir).toBe(join(tmpDir, "../Attachments").replace(/\/[^/]+$/, "/Attachments"));
+    expect(config.attachments_dir).toBe(resolve(tmpDir, "../Attachments"));
   });
 });
 ```
@@ -398,7 +399,7 @@ import type { SiteConfig } from "../types.js";
 
 const ConfigSchema = z.object({
   name: z.string(),
-  url: z.string().url(),
+  url: z.url(),
   issues_dir: z.string().default("."),
   attachments_dir: z.string().optional(),
   web_hosting: z.object({
@@ -803,12 +804,15 @@ import { z } from "zod";
 import type { IssueData } from "../types.js";
 
 const FrontmatterSchema = z.object({
-  issue: z.number({ required_error: "issue is required" }),
+  issue: z.number({
+    error: (iss) =>
+      iss.input === undefined ? "issue is required" : "issue must be a number",
+  }),
   status: z.enum(["draft", "ready"], {
-    error: (issue) =>
-      issue.input === undefined
+    error: (iss) =>
+      iss.input === undefined
         ? "status is required"
-        : `status must be 'draft' or 'ready', got '${issue.input}'`,
+        : `status must be 'draft' or 'ready', got '${iss.input}'`,
   }),
 });
 
@@ -2063,8 +2067,7 @@ export async function runSend(options: SendOptions): Promise<void> {
   );
   if (alreadySent) {
     throw new Error(
-      `Issue #${issueNumber} has already been sent (Resend broadcast id: ${alreadySent.id}). ` +
-      `Use --yes to skip this check if you want to re-send.`
+      `Issue #${issueNumber} has already been sent (Resend broadcast id: ${alreadySent.id}).`
     );
   }
 
@@ -2125,7 +2128,7 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
   if (which.exitCode !== 0) {
     throw new Error(
       "wrangler not found. Install it with: bun add -D wrangler\n" +
-      "Then authenticate with: npx wrangler login"
+      "Then authenticate with: bunx wrangler login"
     );
   }
 
@@ -2134,7 +2137,7 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
   // Run wrangler from output/ so it auto-detects the sibling functions/ directory.
   // build copies functions/ into output/functions/ for this purpose.
   const proc = Bun.spawn([
-    "npx", "wrangler", "pages", "deploy", "website",
+    "bunx", "wrangler", "pages", "deploy", "website",
     `--project-name=${config.web_hosting.project}`,
   ], {
     cwd: outputDir,
@@ -2193,9 +2196,6 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
 
   console.log(`Preview server running at ${url}`);
   console.log("Press Ctrl+C to stop.");
-
-  // Open browser
-  Bun.spawn(["open", url]);
 }
 ```
 
