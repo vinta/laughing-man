@@ -31,13 +31,13 @@ export function createResendProvider(client: Resend): ResendProvider {
 
     async createBroadcast(params: CreateBroadcastParams): Promise<string> {
       const { data, error } = await client.broadcasts.create({
-        audience_id: params.audienceId,
+        audienceId: params.audienceId,
         from: params.from,
-        reply_to: params.replyTo,
+        replyTo: params.replyTo,
         subject: params.subject,
         html: params.html,
         name: params.name,
-      } as any);
+      });
       if (error) throw new Error(`Resend error: ${error.message}`);
       if (!data?.id) throw new Error("Resend returned no broadcast id");
       return data.id;

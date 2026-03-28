@@ -1,27 +1,25 @@
 import { readFileSync } from "node:fs";
 import type { SiteConfig, IssueData } from "../../src/types.js";
+import { escapeHtml } from "./escape.js";
 
 interface IndexProps {
   issues: IssueData[];
   config: SiteConfig;
 }
 
-function getStyles(): string {
-  return readFileSync(
-    new URL("styles.css", import.meta.url).pathname,
-    "utf8"
-  );
-}
+const styles = readFileSync(
+  new URL("styles.css", import.meta.url).pathname,
+  "utf8"
+);
 
 export function IndexPage({ issues, config }: IndexProps): string {
-  const styles = getStyles();
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
 
   const listItems = sorted
     .map(
       (issue) => `
     <li>
-      <a href="/issues/${issue.issue}/">${issue.title}</a>
+      <a href="/issues/${issue.issue}/">${escapeHtml(issue.title)}</a>
       <div class="issue-number">Issue #${issue.issue}</div>
     </li>`
     )
@@ -32,13 +30,13 @@ export function IndexPage({ issues, config }: IndexProps): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${config.name}</title>
+  <title>${escapeHtml(config.name)}</title>
   <style>${styles}</style>
 </head>
 <body>
   <div class="container">
     <header>
-      <a class="site-name" href="/">${config.name}</a>
+      <a class="site-name" href="/">${escapeHtml(config.name)}</a>
       <a class="subscribe-link" href="#subscribe">Subscribe</a>
     </header>
     <main>

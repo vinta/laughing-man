@@ -49,7 +49,7 @@ describe("createResendProvider", () => {
     expect(mockCreate).toHaveBeenCalledTimes(1);
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        audience_id: "aud_123",
+        audienceId: "aud_123",
         from: "Test <test@example.com>",
         subject: "Issue #1: My First Issue",
         html: "<h1>Hello</h1>",

@@ -1,4 +1,5 @@
 import type { IssueProps } from "../../src/types.js";
+import { escapeHtml } from "./escape.js";
 
 export function EmailPage({ title, issue, content, config }: IssueProps): string {
   return `<!DOCTYPE html>
@@ -7,7 +8,7 @@ export function EmailPage({ title, issue, content, config }: IssueProps): string
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!--[if !mso]><!--><meta http-equiv="X-UA-Compatible" content="IE=edge"><!--<![endif]-->
-  <title>${title}</title>
+  <title>${escapeHtml(title)}</title>
   <!--[if mso]>
   <style>body,table,td{font-family:Arial,Helvetica,sans-serif!important}</style>
   <![endif]-->
@@ -20,7 +21,7 @@ export function EmailPage({ title, issue, content, config }: IssueProps): string
           <!-- Header -->
           <tr>
             <td style="border-bottom:2px solid #e5e7eb;padding-bottom:16px;margin-bottom:32px;">
-              <a href="${config.url}" style="font-weight:600;font-size:16px;color:#1a1a1a;text-decoration:none;letter-spacing:0.02em;">${config.name}</a>
+              <a href="${escapeHtml(config.url)}" style="font-weight:600;font-size:16px;color:#1a1a1a;text-decoration:none;letter-spacing:0.02em;">${escapeHtml(config.name)}</a>
             </td>
           </tr>
           <!-- Body -->
@@ -34,7 +35,7 @@ export function EmailPage({ title, issue, content, config }: IssueProps): string
           <tr>
             <td style="border-top:1px solid #e5e7eb;padding-top:24px;margin-top:32px;">
               <p style="font-size:13px;color:#6b7280;text-align:center;margin:0;">
-                You're receiving this because you subscribed to ${config.name}.
+                You're receiving this because you subscribed to ${escapeHtml(config.name)}.
                 <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#2563eb;">Unsubscribe</a>
               </p>
             </td>
