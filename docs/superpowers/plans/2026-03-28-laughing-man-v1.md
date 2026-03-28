@@ -964,6 +964,25 @@ describe("processImages", () => {
     expect(result.emailHtml).toContain('src="https://cdn.example.com/photo.jpg"');
   });
 
+  it("resolves Obsidian-style paths where src includes a folder that matches attachments_dir", async () => {
+    // Obsidian writes ![](Attachments/photo.jpg) but attachments_dir already points to Attachments/
+    const imgPath = join(tmpDir, "Attachments", "photo.jpg");
+    writeFileSync(imgPath, "fake-image-data");
+
+    const html = `<img src="Attachments/photo.jpg">`;
+    const result = await processImages({
+      html,
+      issueNumber: 3,
+      markdownFilePath: join(tmpDir, "issues", "issue-3.md"),
+      attachmentsDir: join(tmpDir, "Attachments"),
+      outputDir,
+      siteUrl: "https://example.com",
+    });
+
+    expect(result.webHtml).toContain('src="/images/3/photo.jpg"');
+    expect(existsSync(join(outputDir, "images", "3", "photo.jpg"))).toBe(true);
+  });
+
   it("throws if relative image cannot be found", async () => {
     const html = `<img src="missing.jpg">`;
     await expect(
@@ -1017,10 +1036,17 @@ function resolveImagePath(
   const fromMarkdown = join(dirname(markdownFilePath), src);
   if (existsSync(fromMarkdown)) return fromMarkdown;
 
-  // Try relative to attachments_dir
+  // Try relative to attachments_dir (full src path)
   if (attachmentsDir) {
     const fromAttachments = join(attachmentsDir, src);
     if (existsSync(fromAttachments)) return fromAttachments;
+  }
+
+  // Try basename only in attachments_dir (handles Obsidian-style paths like
+  // "Attachments/photo.jpg" when attachments_dir already points to Attachments/)
+  if (attachmentsDir && basename(src) !== src) {
+    const fromAttachmentsBase = join(attachmentsDir, basename(src));
+    if (existsSync(fromAttachmentsBase)) return fromAttachmentsBase;
   }
 
   return null;
