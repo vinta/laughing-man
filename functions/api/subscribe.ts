@@ -18,13 +18,13 @@ export async function handleSubscribe(
   console.log("[subscribe] request received", { email: body?.email });
 
   if (!body || !body.email || typeof body.email !== "string") {
-    console.log("[subscribe] invalid body");
+    console.error("[subscribe] invalid body");
     return Response.json({ error: "A valid email is required." }, { status: 400 });
   }
 
   const email = body.email.trim().toLowerCase();
   if (!EMAIL_RE.test(email)) {
-    console.log("[subscribe] invalid email format", { email });
+    console.error("[subscribe] invalid email format", { email });
     return Response.json({ error: "A valid email is required." }, { status: 400 });
   }
 
