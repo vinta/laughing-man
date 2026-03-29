@@ -23,7 +23,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
 <body class="issue-page">
   <header class="site-header">
     <a class="site-name" href="/">${escapeHtml(config.name)}</a>
-    <a class="site-link" href="/">Archive</a>
+    <a class="site-link" href="/">Archives</a>
   </header>
   <main class="issue-main">
     <section class="issue-hero">
@@ -31,8 +31,8 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
         <p class="eyebrow">Issue Dossier #${issue}</p>
         <h1>${escapeHtml(title)}</h1>
         <p class="issue-summary">
-          Filed inside the Laughing Man archive. Read online here, or subscribe from the archive
-          front page for the next transmission.
+          Filed inside the public archive. Read online here, or subscribe from the front page for
+          the next issue.
         </p>
       </div>
       <div class="issue-hero-emblem" aria-hidden="true">
@@ -49,7 +49,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
     </section>
   </main>
   <footer class="site-footer">
-    <p><a href="/">Return to the archive</a> · <a href="/#subscribe">Subscribe for the next issue</a></p>
+    <p><a href="/">Back to archives</a> · <a href="/#subscribe">Subscribe for the next issue</a></p>
   </footer>
 </body>
 </html>`;

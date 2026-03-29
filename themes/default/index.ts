@@ -10,7 +10,7 @@ interface IndexProps {
 
 const styles = readFileSync(
   new URL("styles.css", import.meta.url).pathname,
-  "utf8"
+  "utf8",
 );
 
 export function IndexPage({ issues, config }: IndexProps): string {
@@ -24,9 +24,9 @@ export function IndexPage({ issues, config }: IndexProps): string {
       <a class="issue-row" href="/issues/${issue.issue}/">
         <span class="issue-number">Issue ${String(issue.issue).padStart(2, "0")}</span>
         <span class="issue-title">${escapeHtml(issue.title)}</span>
-        <span class="issue-action">Open dossier</span>
+        <span class="issue-action">Read issue</span>
       </a>
-    </li>`
+    </li>`,
     )
     .join("\n");
 
@@ -48,55 +48,58 @@ export function IndexPage({ issues, config }: IndexProps): string {
   </header>
   <main class="index-main">
     <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">The Laughing Man Protocol</p>
-        <h1>${escapeHtml(config.name)}</h1>
-        <p class="hero-summary">
-          A newsletter archive staged like a public-security case file. New dispatches arrive by
-          email, while the full record stays open on the wire.
-        </p>
-        <div class="hero-actions">
-          <a class="button button-primary" href="#subscribe">Join the next transmission</a>
-          <a class="button button-secondary" href="#archive">Browse the archive</a>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">Signal Archive</p>
+          <h1>${escapeHtml(config.name)}</h1>
+          <p class="hero-summary">
+            New issues arrive by email. Every published issue stays open here as part of the
+            archive.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#subscribe">Subscribe</a>
+            <a class="button button-secondary" href="#archive">Browse archive</a>
+          </div>
+          <dl class="hero-stats" aria-label="Archive stats">
+            <div>
+              <dt>Published issues</dt>
+              <dd>${sorted.length}</dd>
+            </div>
+            <div>
+              <dt>Latest issue</dt>
+              <dd>${latestIssue ? `#${latestIssue.issue}` : "Standby"}</dd>
+            </div>
+          </dl>
         </div>
-        <dl class="hero-stats" aria-label="Archive stats">
-          <div>
-            <dt>Issues on file</dt>
-            <dd>${sorted.length}</dd>
+        <div class="hero-emblem" aria-hidden="true">
+          <div class="hero-emblem-orbit hero-emblem-orbit-outer"></div>
+          <div class="hero-emblem-orbit hero-emblem-orbit-inner"></div>
+          <div class="emblem-shell">
+            ${laughingManLogo}
           </div>
-          <div>
-            <dt>Latest dossier</dt>
-            <dd>${latestIssue ? `#${latestIssue.issue}` : "Standby"}</dd>
-          </div>
-        </dl>
-      </div>
-      <div class="hero-emblem" aria-hidden="true">
-        <div class="emblem-shell">
-          ${laughingManLogo}
+          <p class="hero-emblem-caption">Open archive · Direct delivery</p>
         </div>
       </div>
     </section>
-    <section class="signal-strip" aria-label="Theme note">
+    <section class="signal-strip" aria-label="Site purpose">
       <p>
-        Built for deliberate reading instead of endless scrolling. Each issue ships directly to the
-        inbox, then lands here as part of the public archive.
+        Published issues stay readable on the web. New ones arrive directly in your inbox.
       </p>
     </section>
     <section id="subscribe" class="section-block subscribe-block">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Direct Intake</p>
+          <p class="eyebrow">Direct Delivery</p>
           <h2>Subscribe for the next issue.</h2>
         </div>
         <p class="section-copy">
-          Receive each release as soon as it clears the wire. No feed algorithms, no timeline drift,
-          just the next transmission.
+          One address, one confirmation, and the next dispatch when it is published.
         </p>
       </div>
       <form class="subscribe-form" id="subscribe-form">
         <label class="visually-hidden" for="email">Email address</label>
         <input id="email" type="email" name="email" placeholder="your@email.com" required>
-        <button type="submit">Enter the channel</button>
+        <button type="submit">Subscribe</button>
       </form>
       <p class="subscribe-message" id="subscribe-message" hidden></p>
     </section>
@@ -107,7 +110,7 @@ export function IndexPage({ issues, config }: IndexProps): string {
           <h2>Every published issue, arranged in sequence.</h2>
         </div>
         <p class="section-copy">
-          The archive stays linear and readable: issue number, title, open the dossier, continue.
+          The archive stays linear and readable: issue number, title, open the issue, continue.
         </p>
       </div>
       <ul class="issue-list" aria-label="Published issues">

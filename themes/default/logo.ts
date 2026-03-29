@@ -6,7 +6,8 @@ export const laughingManLogo = readFileSync(
 )
   .replace(/<\?xml[\s\S]*?\?>\s*/u, "")
   .replace(/<!--[\s\S]*?-->\s*/u, "")
+  .replace(/\s(width|height)="[^"]*"/gu, "")
   .replace(
     /<svg\b/u,
-    '<svg class="laughing-man-logo-svg" aria-hidden="true" focusable="false"'
+    '<svg class="laughing-man-logo-svg" aria-hidden="true" focusable="false" viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet"'
   );
