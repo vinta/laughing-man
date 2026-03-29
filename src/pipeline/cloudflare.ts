@@ -10,8 +10,9 @@ export function extractApexDomain(domain: string) {
 }
 
 export async function verifyAuth(client: Cloudflare, accountId: string) {
-  const account = await client.accounts.get({ account_id: accountId });
-  return account.name;
+  // List Pages projects to verify token + account ID without needing Account Settings Read
+  await client.pages.projects.list({ account_id: accountId });
+  return accountId;
 }
 
 export async function ensureProject(
@@ -23,7 +24,7 @@ export async function ensureProject(
     await client.pages.projects.get(projectName, { account_id: accountId });
     return { created: false };
   } catch (err) {
-    if (err instanceof Error && "status" in err && err.status === 404) {
+    if (err instanceof Cloudflare.APIError && err.status === 404) {
       await client.pages.projects.create({
         account_id: accountId,
         name: projectName,
@@ -58,6 +59,7 @@ export async function ensureDomain(
 export type DnsResult =
   | { status: "created" }
   | { status: "exists" }
+  | { status: "managed_conflict"; domain: string; target: string }
   | { status: "external"; domain: string; target: string };
 
 export async function ensureDnsRecord(
@@ -90,13 +92,24 @@ export async function ensureDnsRecord(
   }
 
   // Create CNAME record
-  await client.dns.records.create({
-    zone_id: zoneId,
-    type: "CNAME",
-    name: domain,
-    content: target,
-    ttl: 1,
-    proxied: true,
-  });
-  return { status: "created" };
+  try {
+    await client.dns.records.create({
+      zone_id: zoneId,
+      type: "CNAME",
+      name: domain,
+      content: target,
+      ttl: 1,
+      proxied: true,
+    });
+    return { status: "created" };
+  } catch (err) {
+    // A managed DNS record (from Workers or another Pages project) already exists on this host
+    if (
+      err instanceof Cloudflare.APIError &&
+      err.errors?.some((e) => e.code === 81062)
+    ) {
+      return { status: "managed_conflict", domain, target };
+    }
+    throw err;
+  }
 }
