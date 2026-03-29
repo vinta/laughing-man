@@ -46,6 +46,8 @@ Ask the user for each value, then edit `laughing-man.yaml`:
 | `url`                    | URL it will be hosted at?      | "https://newsletter.example.com" |
 | `web_hosting.project`    | Cloudflare Pages project name? | "my-newsletter"                  |
 | `web_hosting.domain`     | Custom domain? (optional)      | "newsletter.example.com"         |
+
+If `url` uses a custom domain, remind the user to also set `web_hosting.domain`. Without it, `setup web` skips custom domain and DNS setup.
 | `email_hosting.from`     | Sender name and email?         | "Vinta <hello@example.com>"      |
 | `email_hosting.reply_to` | Reply-to email? (optional)     | "hello@example.com"              |
 
@@ -57,16 +59,19 @@ Walk the user through creating a scoped token:
 2. "Create Token" > "Create Custom Token" > "Get started"
 3. Token name: `laughing-man`
 4. Permissions:
-   - **Account | Cloudflare Pages | Edit** (required)
+   - **Account | Cloudflare Pages | Edit** (required for creating/deploying Pages projects)
    - **Zone | DNS | Edit** (only if using a custom domain on Cloudflare DNS)
+   - No other permissions needed. Account Settings Read is NOT required.
 5. Account Resources: Include > Specific account > (their account)
 6. Zone Resources: Include > Specific zone > (their zone, only if custom domain)
 7. "Continue to summary" > "Create Token"
 
+Note: the Pages Edit permission is account-scoped (Cloudflare does not support per-project scoping). This token can manage all Pages projects under the account. DNS Edit is scoped to the specific zone selected.
+
 They need to save two values:
 
-- The API token
-- Their Cloudflare Account ID (found on the dashboard sidebar or in the URL)
+- The API token (shown only once after creation)
+- Their Cloudflare Account ID (a 32-character hex string found in the dashboard URL: `https://dash.cloudflare.com/<account-id>/...`)
 
 ### 4. Save Cloudflare credentials
 
@@ -102,13 +107,16 @@ bunx @vinta/laughing-man setup web
 Expected output (all green):
 
 ```
-[ok] Cloudflare API token valid (account: ...)
+[ok] Cloudflare API token valid
 [ok] Pages project "..." created
-[ok] Custom domain ... added           # only if domain configured
-[ok] DNS CNAME record created (...)    # only if domain on Cloudflare DNS
+[ok] Custom domain ... added to Pages project "..."   # only if domain configured
+[ok] DNS CNAME record created (... -> ....pages.dev)   # only if domain on Cloudflare DNS
 ```
 
-If output shows `[!!]` for DNS, relay the CNAME record to the user so they can add it with their external DNS provider.
+If output shows `[!!]`:
+
+- **DNS not on Cloudflare**: relay the CNAME record to the user so they can add it with their external DNS provider.
+- **Managed DNS conflict** ("A DNS record managed by Workers or Pages already exists"): a different Workers or Pages project already owns a DNS record on that host. The user must either remove the existing record in the Cloudflare dashboard or change `web_hosting.domain` to a different domain/subdomain.
 
 ### 7. Write the first issue
 
@@ -142,7 +150,9 @@ bunx @vinta/laughing-man deploy
 | Problem                                 | Fix                                                                                      |
 | --------------------------------------- | ---------------------------------------------------------------------------------------- |
 | "Cloudflare API token is invalid"       | Regenerate at dash.cloudflare.com/profile/api-tokens                                     |
+| 403 Unauthorized on `setup web`         | Token needs Account > Cloudflare Pages > Edit. Account Settings Read is NOT needed.      |
 | "API token lacks required permissions"  | Token needs Account > Cloudflare Pages > Edit (and Zone > DNS > Edit for custom domains) |
 | "Pages project name X is not available" | Change `web_hosting.project` in laughing-man.yaml                                        |
+| "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Remove it in the Cloudflare dashboard or use a different domain/subdomain. |
 | Deploy fails with "wrangler not found"  | Run `bun add -D wrangler`                                                                |
 | Custom domain shows 522 error           | Wait for DNS propagation (up to 48h), verify CNAME is correct                            |
