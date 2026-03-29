@@ -3,6 +3,7 @@
   --bg-surface: #fafbfc;
   --text: #1e2d3d;
   --text-muted: #607080;
+  --text-faint: #8a93a0;
   --accent: #005577;
   --line: rgba(0, 85, 119, 0.18);
   --success: #1a7a3a;
@@ -10,7 +11,7 @@
   --content-width: 75rem;
   --reading-width: 64rem;
   --header-height: 3.5rem;
-  --font-sans: "Space Grotesk", "Noto Sans TC", sans-serif;
+  --font-sans: "Space Grotesk", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
 }
 
@@ -472,6 +473,7 @@ strong {
 .issue-body {
   max-inline-size: var(--reading-width);
   margin-inline: auto;
+  font-family: sans-serif;
   font-size: 1.125rem;
   line-height: 1.75;
 }
@@ -606,7 +608,7 @@ th {
 }
 
 del {
-  color: var(--text-muted);
+  color: var(--text-faint);
 }
 
 /* ─── Utilities ─── */
