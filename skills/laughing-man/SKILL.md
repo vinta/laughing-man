@@ -118,6 +118,21 @@ If output shows `[!!]`:
 - **DNS not on Cloudflare**: relay the CNAME record to the user so they can add it with their external DNS provider.
 - **Managed DNS conflict** ("A DNS record managed by Workers or Pages already exists"): a different Workers or Pages project already owns a DNS record on that host. The user must either remove the existing record in the Cloudflare dashboard or change `web_hosting.domain` to a different domain/subdomain.
 
+### Apex domains and CNAME flattening
+
+If the user is using an apex domain (e.g., `example.com` rather than `newsletter.example.com`), Cloudflare will show a note: "CNAME records normally can not be on the zone apex. We use CNAME flattening to make it possible."
+
+This is expected and correct. Apex domains require:
+
+1. The domain must be a Cloudflare zone on the same account (nameservers pointed to Cloudflare).
+2. The custom domain must be added through Pages *before* the CNAME is created (our `setup web` does this in the right order). Doing it backwards causes a 522 error.
+3. Cloudflare automatically flattens the apex CNAME (resolves it to the final IP) on all plans.
+
+Docs:
+- https://developers.cloudflare.com/pages/configuration/custom-domains/
+- https://developers.cloudflare.com/dns/cname-flattening/
+- https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-zone-apex/
+
 ### 7. Write the first issue
 
 Create a Markdown file (e.g., `001.md`) in the newsletter directory:
