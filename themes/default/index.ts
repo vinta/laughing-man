@@ -63,7 +63,6 @@ export function IndexPage({ issues, config }: IndexProps): string {
         </form>
         <p class="subscribe-message" id="subscribe-message" hidden></p>
       </div>
-      <p class="hero-stat">${sorted.length} published</p>
     </section>
     <section id="archive" class="feed">
       <p class="feed-label" aria-hidden="true">Archives</p>
