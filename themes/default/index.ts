@@ -68,9 +68,9 @@ export function IndexPage({ issues, config }: IndexProps): string {
     <section id="archive" class="feed">
       <p class="feed-label" aria-hidden="true">Archives</p>
       <ul class="feed-list" aria-label="Published issues">
-        ${feedItems}
+        ${feedItems || '<li class="feed-empty">No published issues yet. Subscribe to get notified.</li>'}
       </ul>
-      <p class="feed-end">End of Archives</p>
+      ${feedItems ? '<p class="feed-end">End of Archives</p>' : ""}
     </section>
   </main>
   <footer class="site-footer">

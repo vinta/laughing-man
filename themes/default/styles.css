@@ -356,6 +356,14 @@ strong {
   text-decoration: underline;
 }
 
+.feed-empty {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 2rem 0;
+}
+
 .feed-end {
   margin: 1.25rem 0 0;
   font-family: var(--font-mono);
