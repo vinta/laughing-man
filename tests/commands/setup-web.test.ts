@@ -7,8 +7,8 @@ import os from "node:os";
 const mockVerifyAuth = mock(() => Promise.resolve("test-account"));
 const mockEnsureProject = mock(() => Promise.resolve({ created: true }));
 const mockEnsureDomain = mock(() => Promise.resolve({ created: true }));
-const mockEnsureDnsRecord = mock(() =>
-  Promise.resolve({ status: "created" as const }),
+const mockEnsureDnsRecord = mock((): Promise<{ status: string; domain?: string; target?: string }> =>
+  Promise.resolve({ status: "created" }),
 );
 const mockCreateClient = mock(() => ({}));
 
@@ -64,7 +64,7 @@ describe("runSetupWeb", () => {
     mockEnsureProject.mockReset().mockImplementation(() => Promise.resolve({ created: true }));
     mockEnsureDomain.mockReset().mockImplementation(() => Promise.resolve({ created: true }));
     mockEnsureDnsRecord.mockReset().mockImplementation(() =>
-      Promise.resolve({ status: "created" as const }),
+      Promise.resolve({ status: "created" }),
     );
     mockCreateClient.mockReset().mockImplementation(() => ({}));
   });
@@ -126,7 +126,7 @@ describe("runSetupWeb", () => {
     );
     mockEnsureDnsRecord.mockReset().mockImplementation(() =>
       Promise.resolve({
-        status: "external" as const,
+        status: "external",
         domain: "newsletter.example.com",
         target: "my-project.pages.dev",
       }),
