@@ -42,13 +42,6 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
     </section>
   </main>
   <footer class="site-footer">
-    <div class="footer-rule" aria-hidden="true"></div>
-    <p class="footer-comment">// End of Transmission</p>
-    <nav class="footer-nav" aria-label="Footer">
-      <a href="/">Archive</a>
-      <span class="footer-sep" aria-hidden="true">&middot;</span>
-      <a href="/#subscribe">Subscribe</a>
-    </nav>
     <p class="footer-name">${escapeHtml(config.name)}</p>
   </footer>
 </body>

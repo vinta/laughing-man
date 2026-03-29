@@ -73,18 +73,10 @@ export function IndexPage({ issues, config }: IndexProps): string {
       <ul class="feed-list" aria-label="Published issues">
         ${feedItems}
       </ul>
+      <p class="feed-end">End of Archive</p>
     </section>
   </main>
   <footer class="site-footer">
-    <div class="footer-rule" aria-hidden="true"></div>
-    <p class="footer-comment">// End of Archive</p>
-    <nav class="footer-nav" aria-label="Footer">
-      <a href="#subscribe">Subscribe</a>
-      <span class="footer-sep" aria-hidden="true">&middot;</span>
-      <a href="#archive">Archive</a>
-      <span class="footer-sep" aria-hidden="true">&middot;</span>
-      <a href="#">Top</a>
-    </nav>
     <p class="footer-name">${escapeHtml(config.name)}</p>
   </footer>
   <script>

@@ -305,58 +305,32 @@ strong {
   color: var(--accent);
 }
 
-/* ─── Footer ─── */
-
-.site-footer {
-  max-inline-size: var(--content-width);
-  margin-inline: auto;
-  padding: 0 clamp(1.25rem, 4vw, 2.5rem) clamp(2.5rem, 5vw, 4rem);
-  text-align: center;
-}
-
-.footer-rule {
-  block-size: 1px;
-  margin-block-end: 2rem;
-  background: var(--line);
-}
-
-.footer-comment {
-  margin-block-end: 1.25rem;
+.feed-end {
+  margin: 1.25rem 0 0;
   font-family: var(--font-mono);
   font-size: 0.76rem;
-  color: var(--text-muted);
   letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-align: center;
   opacity: 0.6;
 }
 
-.footer-nav {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-block-end: 1.5rem;
-}
+/* ─── Footer ─── */
 
-.footer-nav a {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-}
-
-.footer-nav a:hover {
-  color: var(--accent);
-}
-
-.footer-sep {
-  color: var(--text-muted);
-  opacity: 0.3;
+.site-footer {
+  margin-block-start: clamp(2rem, 5vw, 4rem);
+  padding: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 4vw, 2.5rem);
+  text-align: center;
+  background: var(--bg-surface);
+  border-block-start: 1px solid var(--line);
 }
 
 .footer-name {
   margin: 0;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
+  letter-spacing: 0.06em;
   color: var(--text-muted);
-  opacity: 0.5;
 }
 
 /* ─── Issue: Hero ─── */
