@@ -84,6 +84,8 @@ CLOUDFLARE_ACCOUNT_ID=<account-id>
 
 Never put real tokens in `laughing-man.yaml` if the repo is public.
 
+These env vars are used by both `setup web` (Cloudflare SDK) and `deploy` (wrangler). No separate `wrangler login` is needed.
+
 ### 5. Save Resend credentials
 
 The user needs:
