@@ -46,10 +46,10 @@ Ask the user for each value, then edit `laughing-man.yaml`:
 | `url`                    | URL it will be hosted at?      | "https://newsletter.example.com" |
 | `web_hosting.project`    | Cloudflare Pages project name? | "my-newsletter"                  |
 | `web_hosting.domain`     | Custom domain? (optional)      | "newsletter.example.com"         |
-
-If `url` uses a custom domain, remind the user to also set `web_hosting.domain`. Without it, `setup web` skips custom domain and DNS setup.
 | `email_hosting.from`     | Sender name and email?         | "Vinta <hello@example.com>"      |
 | `email_hosting.reply_to` | Reply-to email? (optional)     | "hello@example.com"              |
+
+If `url` uses a custom domain, remind the user to also set `web_hosting.domain`. Without it, `setup web` skips custom domain and DNS setup.
 
 ### 3. Create a Cloudflare API token
 
@@ -118,7 +118,7 @@ Expected output (all green):
 If output shows `[!!]`:
 
 - **DNS not on Cloudflare**: relay the CNAME record to the user so they can add it with their external DNS provider.
-- **Managed DNS conflict** ("A DNS record managed by Workers or Pages already exists"): a different Workers or Pages project already owns a DNS record on that host. The user must either remove the existing record in the Cloudflare dashboard or change `web_hosting.domain` to a different domain/subdomain.
+- **Managed DNS conflict** ("A DNS record managed by Workers or Pages already exists"): a different Workers or Pages project already owns a DNS record on that host. Managed records can't be deleted from the DNS page. The user must delete the Worker or Pages project that owns the record (under Workers & Pages in the dashboard), or change `web_hosting.domain` to a different domain/subdomain.
 
 ### Apex domains and CNAME flattening
 
@@ -150,11 +150,22 @@ status: ready
 This is the first issue.
 ```
 
+The `status` field controls visibility:
+- `ready` -- included in `build` and `deploy`
+- `draft` -- excluded from `build`, but included in `preview` (unless `--no-drafts` is passed)
+
 ### 8. Build and deploy
 
 ```bash
 bunx @vinta/laughing-man build
 bunx @vinta/laughing-man deploy
+```
+
+To preview locally before deploying:
+
+```bash
+bunx @vinta/laughing-man preview             # includes drafts
+bunx @vinta/laughing-man preview --no-drafts  # published issues only
 ```
 
 ### 9. Verify
@@ -170,6 +181,6 @@ bunx @vinta/laughing-man deploy
 | 403 Unauthorized on `setup web`         | Token needs Account > Cloudflare Pages > Edit. Account Settings Read is NOT needed.      |
 | "API token lacks required permissions"  | Token needs Account > Cloudflare Pages > Edit (and Zone > DNS > Edit for custom domains) |
 | "Pages project name X is not available" | Change `web_hosting.project` in laughing-man.yaml                                        |
-| "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Remove it in the Cloudflare dashboard or use a different domain/subdomain. |
+| "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Managed records can't be deleted from the DNS page directly. Delete the Worker or Pages project that owns the record under Workers & Pages in the dashboard, or use a different domain/subdomain. |
 | Deploy fails with "wrangler not found"  | Run `bun add -D wrangler`                                                                |
 | Custom domain shows 522 error           | Wait for DNS propagation (up to 48h), verify CNAME is correct                            |
