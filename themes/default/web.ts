@@ -35,7 +35,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
       </article>
     </section>
     <nav class="issue-back">
-      <a href="/">Back to Archives</a>
+      <a href="/">&lt; Back to Archives</a>
     </nav>
   </main>
   <footer class="site-footer">
