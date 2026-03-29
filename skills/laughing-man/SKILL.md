@@ -13,8 +13,8 @@ Check current state and skip completed steps:
 
 - `laughing-man.yaml` exists with real values (not placeholders)? Skip steps 1-2.
 - `.env` has `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`? Skip steps 3-4.
-- `.env` has `RESEND_API_KEY` and `RESEND_AUDIENCE_ID`? Skip step 5.
-- `.md` issue files already exist? Skip step 7.
+- `.env` has `RESEND_API_KEY` and `RESEND_AUDIENCE_ID`, and Pages secrets are set? Skip steps 5-6.
+- `.md` issue files already exist? Skip step 8.
 
 Tell the user which steps you're skipping and why, then start from the first incomplete step.
 
@@ -88,21 +88,49 @@ Never put real tokens in `laughing-man.yaml` if the repo is public.
 
 These env vars are used by both `setup web` (Cloudflare SDK) and `deploy` (wrangler). No separate `wrangler login` is needed.
 
-### 5. Save Resend credentials
+### 5. Set up Resend
 
-The user needs:
+Walk the user through creating an API key and audience:
 
-- An API key from https://resend.com/api-keys
-- An Audience ID from https://resend.com/audiences
+1. Go to https://resend.com/signup (or https://resend.com/login if they have an account)
+2. **Verify a sending domain:**
+   - Go to https://resend.com/domains
+   - "Add Domain" > enter their domain (e.g., `example.com`)
+   - Add the DNS records Resend provides (SPF, DKIM, DMARC)
+   - Wait for verification (usually a few minutes, can take up to 48h)
+   - The `email_hosting.from` address in `laughing-man.yaml` must use this verified domain
+3. **Create an API key:**
+   - Go to https://resend.com/api-keys
+   - "Create API Key"
+   - Name: `laughing-man`
+   - Permission: "Sending access" is sufficient (Full access also works)
+   - Domain: scope to the verified domain, or "All domains"
+   - Save the key (shown only once)
+4. **Create an audience:**
+   - Go to https://resend.com/audiences
+   - "Create Audience"
+   - Name: the newsletter name (e.g., "The Laughing Man")
+   - Copy the Audience ID (a string like `aud_...`)
 
-Add to `.env`:
+### 6. Save Resend credentials
+
+Add to `.env` in the newsletter directory:
 
 ```
 RESEND_API_KEY=<key>
 RESEND_AUDIENCE_ID=<audience-id>
 ```
 
-### 6. Run setup web
+Then set them as **secrets** on the Cloudflare Pages project so the subscribe function can access them in production:
+
+```bash
+bunx wrangler pages secret put RESEND_API_KEY --project-name <project>
+bunx wrangler pages secret put RESEND_AUDIENCE_ID --project-name <project>
+```
+
+Paste each value when prompted. No redeployment is needed. Secrets take effect immediately.
+
+### 7. Run setup web
 
 ```bash
 bunx @vinta/laughing-man setup web
@@ -137,7 +165,7 @@ Docs:
 - https://developers.cloudflare.com/dns/cname-flattening/
 - https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-zone-apex/
 
-### 7. Write the first issue
+### 8. Write the first issue
 
 Create a Markdown file (e.g., `001.md`) in the newsletter directory:
 
@@ -156,7 +184,7 @@ The `status` field controls visibility:
 - `ready` -- included in `build` and `deploy`
 - `draft` -- excluded from `build`, but included in `preview` (unless `--no-drafts` is passed)
 
-### 8. Build and deploy
+### 9. Build and deploy
 
 ```bash
 bunx @vinta/laughing-man build
@@ -170,7 +198,7 @@ bunx @vinta/laughing-man preview             # includes drafts
 bunx @vinta/laughing-man preview --no-drafts  # published issues only
 ```
 
-### 9. Verify
+### 10. Verify
 
 - Check `https://<project>.pages.dev`
 - If custom domain is configured, also check `https://<domain>` (DNS may take a few minutes)
@@ -186,3 +214,5 @@ bunx @vinta/laughing-man preview --no-drafts  # published issues only
 | "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Managed records can't be deleted from the DNS page directly. Delete the Worker or Pages project that owns the record under Workers & Pages in the dashboard, or use a different domain/subdomain. |
 | Deploy fails with "wrangler not found"  | Run `bun add -D wrangler`                                                                |
 | Custom domain shows 522 error           | Wait for DNS propagation (up to 48h), verify CNAME is correct                            |
+| Subscribe form returns "Failed to subscribe" | Resend secrets not set on Pages project. Run `bunx wrangler pages secret put RESEND_API_KEY --project-name <project>` and same for `RESEND_AUDIENCE_ID`. Verify with `bunx wrangler pages secret list --project-name <project>`. |
+| Subscribe form returns "Invalid request" | Request body is not valid JSON or missing `email` field. Check browser console for errors. |
