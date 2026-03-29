@@ -34,6 +34,9 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
         ${content}
       </article>
     </section>
+    <nav class="issue-back">
+      <a href="/">Back to Archives</a>
+    </nav>
   </main>
   <footer class="site-footer">
     <p class="footer-name">${escapeHtml(config.name)}</p>

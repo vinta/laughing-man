@@ -384,6 +384,27 @@ strong {
   opacity: 0.6;
 }
 
+/* ─── Issue: Back link ─── */
+
+.issue-back {
+  max-inline-size: var(--content-width);
+  margin-inline: auto;
+  padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 4vw, 2.5rem);
+  text-align: center;
+}
+
+.issue-back a {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.issue-back a:hover {
+  color: var(--accent);
+}
+
 /* ─── Footer ─── */
 
 .site-footer {
