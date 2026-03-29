@@ -20,6 +20,7 @@ Commands:
   setup web         Create Cloudflare Pages project + custom domain + DNS
   build             Validate + build site and email HTML
   preview           Build (including drafts) + start local preview server
+    --no-drafts     Exclude drafts (show only published issues)
   deploy            Deploy output/website/ to Cloudflare Pages
   send <issue>      Send an issue via Resend Broadcast
     --yes           Skip confirmation prompt (for CI)
@@ -49,7 +50,8 @@ Examples:
       }
 
       case "preview": {
-        await runPreview({ configDir });
+        const noDrafts = args.includes("--no-drafts");
+        await runPreview({ configDir, includeDrafts: !noDrafts });
         break;
       }
 
