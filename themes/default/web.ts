@@ -5,7 +5,7 @@ import { laughingManLogo } from "./logo.js";
 
 const styles = readFileSync(
   new URL("styles.css", import.meta.url).pathname,
-  "utf8"
+  "utf8",
 );
 
 export function WebPage({ title, issue, content, config }: IssueProps): string {
@@ -14,7 +14,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(title)} — ${escapeHtml(config.name)}</title>
+  <title>${escapeHtml(title)} - ${escapeHtml(config.name)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
@@ -23,33 +23,33 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
 <body class="issue-page">
   <header class="site-header">
     <a class="site-name" href="/">${escapeHtml(config.name)}</a>
-    <a class="site-link" href="/">Archives</a>
+    <nav class="site-nav">
+      <a href="/">archive</a>
+    </nav>
   </header>
   <main class="issue-main">
     <section class="issue-hero">
-      <div class="issue-hero-copy">
-        <p class="eyebrow">Issue Dossier #${issue}</p>
-        <h1>${escapeHtml(title)}</h1>
-        <p class="issue-summary">
-          Filed inside the public archive. Read online here, or subscribe from the front page for
-          the next issue.
-        </p>
-      </div>
+      <p class="issue-meta">issue #${issue}</p>
+      <h1>${escapeHtml(title)}</h1>
       <div class="issue-hero-emblem" aria-hidden="true">
-        <div class="emblem-shell emblem-shell-small">
-          ${laughingManLogo}
-        </div>
+        ${laughingManLogo}
       </div>
     </section>
     <section class="issue-reading-surface">
       <article class="issue-body">
-        <p class="issue-meta">Issue #${issue}</p>
         ${content}
       </article>
     </section>
   </main>
   <footer class="site-footer">
-    <p><a href="/">Back to archives</a> · <a href="/#subscribe">Subscribe for the next issue</a></p>
+    <div class="footer-rule" aria-hidden="true"></div>
+    <p class="footer-comment">// end of transmission</p>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="/">archive</a>
+      <span class="footer-sep" aria-hidden="true">&middot;</span>
+      <a href="/#subscribe">subscribe</a>
+    </nav>
+    <p class="footer-name">${escapeHtml(config.name)}</p>
   </footer>
 </body>
 </html>`;
