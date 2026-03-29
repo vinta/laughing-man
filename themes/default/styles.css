@@ -361,11 +361,6 @@ strong {
   line-height: 1.15;
 }
 
-.issue-hero-emblem {
-  margin-block-start: 2rem;
-  inline-size: clamp(5rem, 14vw, 8rem);
-}
-
 /* ─── Issue: Reading surface ─── */
 
 .issue-reading-surface {

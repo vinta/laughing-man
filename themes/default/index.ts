@@ -8,12 +8,10 @@ interface IndexProps {
   config: SiteConfig;
 }
 
-const styles = readFileSync(
-  new URL("styles.css", import.meta.url).pathname,
-  "utf8",
-);
+const stylesPath = new URL("styles.css", import.meta.url).pathname;
 
 export function IndexPage({ issues, config }: IndexProps): string {
+  const styles = readFileSync(stylesPath, "utf8");
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
 
   const feedItems = sorted

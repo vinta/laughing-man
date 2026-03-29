@@ -1,14 +1,11 @@
 import { readFileSync } from "node:fs";
 import type { IssueProps } from "../../src/types.js";
 import { escapeHtml } from "./escape.js";
-import { laughingManLogo } from "./logo.js";
 
-const styles = readFileSync(
-  new URL("styles.css", import.meta.url).pathname,
-  "utf8",
-);
+const stylesPath = new URL("styles.css", import.meta.url).pathname;
 
 export function WebPage({ title, issue, content, config }: IssueProps): string {
+  const styles = readFileSync(stylesPath, "utf8");
   return `<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -31,9 +28,6 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
     <section class="issue-hero">
       <p class="issue-meta">Issue #${issue}</p>
       <h1>${escapeHtml(title)}</h1>
-      <div class="issue-hero-emblem" aria-hidden="true">
-        ${laughingManLogo}
-      </div>
     </section>
     <section class="issue-reading-surface">
       <article class="issue-body">
