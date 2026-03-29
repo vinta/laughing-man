@@ -143,3 +143,6 @@ vite.config.ts.timestamp-*
 
 # Build output
 output/
+
+# Local Claude config
+CLAUDE.local.md
