@@ -64,7 +64,35 @@ The `EmailPage` function builds an MJML string using template literals, calls `m
 
 **Error handling:** `mjml2html()` returns `{ html, errors }`. If `errors` is non-empty, throw with the error messages. This catches malformed MJML at build time.
 
-### 2. Email preview in `laughing-man preview`
+### 2. YouTube iframe-to-thumbnail transform for email
+
+**Problem:** Email clients strip `<iframe>` tags. YouTube embeds in newsletter markdown render on the website but disappear completely in email.
+
+**What changes:** Extend `processImages()` in `src/pipeline/images.ts` to detect YouTube iframes in the email HTML path and replace them with clickable thumbnail images.
+
+This function already produces separate `webHtml` and `emailHtml` by rewriting image URLs differently. The iframe transform follows the same pattern: web HTML keeps the iframe untouched, email HTML gets the replacement.
+
+**Transform logic:**
+
+1. Match `<iframe>` tags whose `src` contains `youtube.com/embed/` or `youtube-nocookie.com/embed/`
+2. Extract the video ID from the URL (the path segment after `/embed/`)
+3. In email HTML, replace the iframe with:
+
+```html
+<a href="https://www.youtube.com/watch?v={VIDEO_ID}" target="_blank">
+  <img src="https://img.youtube.com/vi/{VIDEO_ID}/hqdefault.jpg"
+       alt="{title attribute from iframe, or 'YouTube video'}"
+       width="560" style="max-width:100%;border-radius:8px;" />
+</a>
+```
+
+4. Web HTML is unchanged (keep the original iframe)
+
+**Thumbnail URL:** YouTube serves thumbnails at `https://img.youtube.com/vi/{VIDEO_ID}/hqdefault.jpg` (480x360). No API key needed, works for any public video.
+
+**Scope:** Only YouTube iframes. Other iframes (e.g., Spotify, CodePen) are stripped by email clients but not replaced. This can be extended later if needed.
+
+### 3. Email preview in `laughing-man preview`
 
 **What changes:** Extend the existing Bun.serve preview server in `src/commands/preview.ts` to also serve email output.
 
@@ -149,6 +177,7 @@ The `SendOptions` interface gains an optional `testAddress?: string` field.
 |---|---|
 | `package.json` | Add `mjml` dependency |
 | `themes/default/email.ts` | Replace HTML string with MJML markup + `mjml2html()` |
+| `src/pipeline/images.ts` | Add YouTube iframe-to-thumbnail transform for email HTML |
 | `src/commands/preview.ts` | Add `/email/` routes and email index page |
 | `src/commands/send.ts` | Add `--test` code path using single email send |
 | `src/providers/resend.ts` | Add `sendEmail` method and `SendEmailParams` interface |
@@ -158,6 +187,7 @@ The `SendOptions` interface gains an optional `testAddress?: string` field.
 
 - **MJML compilation:** Unit test that `EmailPage()` returns valid HTML containing expected elements (newsletter name, issue number, unsubscribe link, content)
 - **MJML Outlook output:** Unit test that compiled HTML contains MSO conditional comments (`<!--[if mso]>`)
+- **YouTube iframe transform:** Unit test that `processImages()` replaces YouTube iframes with linked thumbnails in email HTML while preserving iframes in web HTML
 - **Preview email routes:** Integration test that the preview server responds to `/email/` and `/email/1.html`
 - **Test send:** Integration test (or manual test) that `--test` sends via single email API, not broadcast
 - **End-to-end:** `laughing-man build` followed by opening `output/email/1.html` in a browser to visually verify
