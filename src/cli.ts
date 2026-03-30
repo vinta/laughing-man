@@ -6,6 +6,7 @@ import { runDeploy } from "./commands/deploy.js";
 import { runSend } from "./commands/send.js";
 import { runSetupWeb } from "./commands/setup-web.js";
 import { runStamp } from "./commands/stamp.js";
+import { loadConfig } from "./pipeline/config.js";
 
 const args = process.argv.slice(2);
 const configDir = process.cwd();
