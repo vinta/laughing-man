@@ -104,8 +104,7 @@ Walk the user through creating an API key and audience:
    - Go to https://resend.com/api-keys
    - "Create API Key"
    - Name: `laughing-man`
-   - Permission: "Sending access" is sufficient (Full access also works)
-   - Domain: scope to the verified domain, or "All domains"
+   - Permission: **"Full access"** (required because the subscribe function creates contacts in an audience, which is a resource operation, not just sending)
    - Save the key (shown only once)
 4. **Create an audience:**
    - Go to https://resend.com/audiences
