@@ -11,6 +11,12 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
 
   console.log(`Deploying to Cloudflare Pages (${config.web_hosting.project})...`);
 
+  if (!config.env.CLOUDFLARE_API_TOKEN) {
+    throw new Error(
+      "CLOUDFLARE_API_TOKEN is not configured. Set CLOUDFLARE_API_TOKEN env var or add it to laughing-man.yaml."
+    );
+  }
+
   const proc = Bun.spawn([
     "bunx", "wrangler", "pages", "deploy", "website",
     `--project-name=${config.web_hosting.project}`,
@@ -18,6 +24,7 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
     cwd: outputDir,
     stdout: "inherit",
     stderr: "inherit",
+    env: { ...process.env, CLOUDFLARE_API_TOKEN: config.env.CLOUDFLARE_API_TOKEN },
   });
 
   const exitCode = await proc.exited;
