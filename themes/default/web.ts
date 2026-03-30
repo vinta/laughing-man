@@ -58,6 +58,10 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
   </main>
   <footer class="site-footer">
     <p class="footer-name">${escapeHtml(config.name)}</p>
+    <p class="footer-credit">
+      Created with
+      <a href="https://github.com/sadcoderlabs/laughing-man" target="_blank" rel="noopener noreferrer">laughing-man</a>
+    </p>
   </footer>
   <script>
     const subscribeSection = document.getElementById('subscribe');

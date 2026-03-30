@@ -99,6 +99,23 @@ env: {}
     expect(indexHtml).toContain("Hello World");
   });
 
+  it("includes laughing-man credit in generated website footers", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n"
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const indexHtml = readFileSync(join(tmpDir, "output", "website", "index.html"), "utf8");
+    const issueHtml = readFileSync(join(tmpDir, "output", "website", "issues", "1", "index.html"), "utf8");
+
+    expect(indexHtml).toContain("Created with");
+    expect(indexHtml).toContain('href="https://github.com/sadcoderlabs/laughing-man"');
+    expect(issueHtml).toContain("Created with");
+    expect(issueHtml).toContain('href="https://github.com/sadcoderlabs/laughing-man"');
+  });
+
   it("production build shows coming-soon teasers for draft issues", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),
