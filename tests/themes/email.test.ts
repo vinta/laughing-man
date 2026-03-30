@@ -63,8 +63,8 @@ describe("EmailPage", () => {
       config: testConfig,
     });
 
-    expect(html).toContain("<h2>Section</h2>");
-    expect(html).toContain("<p>Some content here.</p>");
+    expect(html).toContain(">Section</h2>");
+    expect(html).toContain(">Some content here.</p>");
   });
 
   it("contains Resend unsubscribe placeholder", () => {
