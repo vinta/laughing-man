@@ -95,10 +95,11 @@ Walk the user through creating an API key and audience:
 1. Go to https://resend.com/signup (or https://resend.com/login if they have an account)
 2. **Verify a sending domain:**
    - Go to https://resend.com/domains
-   - "Add Domain" > enter their domain (e.g., `example.com`)
+   - "Add Domain" > enter a **subdomain** (e.g., `send.example.com` or `newsletter.example.com`), not the root domain. Using a subdomain isolates your sending reputation so that bounces or spam complaints from the newsletter don't affect your root domain's email deliverability.
+   - Region: pick the one closest to your subscribers (e.g., `ap-northeast-1` for Asia, `us-east-1` for US). This controls where Resend's email infrastructure processes and dispatches emails, not where the API call originates from.
    - Add the DNS records Resend provides (SPF, DKIM, DMARC)
    - Wait for verification (usually a few minutes, can take up to 48h)
-   - The `email_hosting.from` address in `laughing-man.yaml` must use this verified domain
+   - The `email_hosting.from` address in `laughing-man.yaml` must use this verified subdomain
 3. **Create an API key:**
    - Go to https://resend.com/api-keys
    - "Create API Key"
