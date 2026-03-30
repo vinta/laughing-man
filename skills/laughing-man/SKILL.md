@@ -12,7 +12,7 @@ Walk the user from zero to a deployed newsletter on Cloudflare Pages with email 
 Check current state and skip completed steps:
 
 - `laughing-man.yaml` exists with real values (not placeholders)? Skip steps 1-2.
-- `.env` has `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`? Skip steps 3-4.
+- `.env` has `CLOUDFLARE_API_TOKEN`? Skip steps 3-4.
 - `.env` has `RESEND_API_KEY` and Pages secret is set? Skip steps 5-6.
 - `.md` issue files already exist? Skip step 8.
 
@@ -31,7 +31,7 @@ Tell the user which steps you're skipping and why, then start from the first inc
 Run this if no `laughing-man.yaml` exists in the working directory:
 
 ```bash
-bunx @vinta/laughing-man init
+bunx @sadcoder/laughing-man init
 ```
 
 Creates `laughing-man.yaml` with placeholder values.
@@ -70,10 +70,7 @@ Walk the user through creating a scoped token:
 
 Note: the Pages Edit permission is account-scoped (Cloudflare does not support per-project scoping). This token can manage all Pages projects under the account. DNS Edit is scoped to the specific zone selected.
 
-They need to save two values:
-
-- The API token (shown only once after creation)
-- Their Cloudflare Account ID (a 32-character hex string found in the dashboard URL: `https://dash.cloudflare.com/<account-id>/...`)
+Save the API token (shown only once after creation). The account ID is auto-discovered from the token at runtime.
 
 ### 4. Save Cloudflare credentials
 
@@ -81,12 +78,11 @@ Create `.env` in the newsletter directory:
 
 ```
 CLOUDFLARE_API_TOKEN=<token>
-CLOUDFLARE_ACCOUNT_ID=<account-id>
 ```
 
 Never put real tokens in `laughing-man.yaml` if the repo is public.
 
-These env vars are used by both `setup web` (Cloudflare SDK) and `deploy` (wrangler). No separate `wrangler login` is needed.
+This env var is used by both `setup web` (Cloudflare SDK) and `deploy` (wrangler). No separate `wrangler login` is needed.
 
 ### 5. Set up Resend
 
@@ -128,7 +124,7 @@ Paste the value when prompted. No redeployment is needed. Secrets take effect im
 ### 7. Run setup web
 
 ```bash
-bunx @vinta/laughing-man setup web
+bunx @sadcoder/laughing-man setup web
 ```
 
 Expected output (all green):
@@ -182,15 +178,15 @@ The `status` field controls visibility:
 ### 9. Build and deploy
 
 ```bash
-bunx @vinta/laughing-man build
-bunx @vinta/laughing-man deploy
+bunx @sadcoder/laughing-man build
+bunx @sadcoder/laughing-man deploy
 ```
 
 To preview locally before deploying:
 
 ```bash
-bunx @vinta/laughing-man preview             # includes drafts
-bunx @vinta/laughing-man preview --no-drafts  # published issues only
+bunx @sadcoder/laughing-man preview             # includes drafts
+bunx @sadcoder/laughing-man preview --no-drafts  # published issues only
 ```
 
 ### 10. Verify
