@@ -104,7 +104,7 @@ Walk the user through creating an API key:
    - Go to https://resend.com/api-keys
    - "Create API Key"
    - Name: `laughing-man`
-   - Permission: **"Full access"** (required because the subscribe function creates contacts in an audience, which is a resource operation, not just sending)
+   - Permission: **"Full access"** (required because the subscribe function creates contacts, which is a resource operation, not just sending)
    - Save the key (shown only once)
 
 ### 6. Save Resend credentials

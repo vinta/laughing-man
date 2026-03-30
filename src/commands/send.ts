@@ -41,7 +41,7 @@ export async function runSend(options: SendOptions): Promise<void> {
   // Auto-discover segment
   const segments = await provider.listSegments();
   if (segments.length === 0) {
-    throw new Error("No segments found in your Resend account. Create one at https://resend.com/audiences");
+    throw new Error("No segments found in your Resend account. Create one at https://resend.com/audiences (Resend calls them Segments).");
   }
 
   let segmentId: string;
