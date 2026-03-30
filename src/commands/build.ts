@@ -4,15 +4,21 @@ import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
+import type { SiteConfig } from "../types.js";
 
 interface BuildOptions {
   configDir: string;
   includeDrafts: boolean;
 }
 
+interface BuildResult {
+  config: SiteConfig;
+  outputDir: string;
+}
+
 const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
-export async function runBuild(options: BuildOptions): Promise<void> {
+export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const { configDir, includeDrafts } = options;
 
   const bust = `?v=${Date.now()}`;
@@ -85,4 +91,6 @@ export async function runBuild(options: BuildOptions): Promise<void> {
   }
 
   console.log(`Build complete: ${sorted.length} issue(s) written to ${outputDir}`);
+
+  return { config, outputDir };
 }
