@@ -9,10 +9,11 @@ interface SendOptions {
   configDir: string;
   issueNumber: number;
   yes: boolean;
+  testAddress?: string;
 }
 
 export async function runSend(options: SendOptions): Promise<void> {
-  const { configDir, issueNumber, yes } = options;
+  const { configDir, issueNumber, yes, testAddress } = options;
 
   const config = await loadConfig(configDir);
 
@@ -72,6 +73,18 @@ export async function runSend(options: SendOptions): Promise<void> {
   }
 
   const html = readFileSync(emailHtmlPath, "utf8");
+
+  if (testAddress) {
+    await provider.sendEmail({
+      to: testAddress,
+      from: config.email_hosting.from,
+      replyTo: config.email_hosting.reply_to,
+      subject: issue.title,
+      html,
+    });
+    console.log(`Test email for issue #${issueNumber} sent to ${testAddress}`);
+    return;
+  }
 
   if (!yes) {
     const answer = prompt(
