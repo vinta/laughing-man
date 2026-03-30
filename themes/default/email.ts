@@ -8,11 +8,21 @@ function stripFirstHeading(html: string): string {
   return html.replace(/^\s*<h1\b[^>]*>[\s\S]*?<\/h1>\s*/i, "");
 }
 
+function assertNoMjInclude(html: string): void {
+  if (/<\s*mj-include\b/i.test(html)) {
+    throw new Error(
+      "Email content cannot contain <mj-include>. Remove MJML include tags from the issue body."
+    );
+  }
+}
+
 export function EmailPage({ title, issue, content, config }: IssueProps): string {
   const escapedTitle = escapeHtml(title);
   const name = escapeHtml(config.name);
   const url = escapeHtml(config.url);
   const bodyContent = stripFirstHeading(content);
+
+  assertNoMjInclude(bodyContent);
 
   const mjml = `
 <mjml>

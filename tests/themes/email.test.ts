@@ -67,6 +67,17 @@ describe("EmailPage", () => {
     expect(html).toContain(">Some content here.</p>");
   });
 
+  it("rejects mj-include tags in rendered content", () => {
+    expect(() =>
+      EmailPage({
+        title: "My First Issue",
+        issue: 1,
+        content: '<p>Hello</p><mj-include path="/etc/hosts" type="css" />',
+        config: testConfig,
+      })
+    ).toThrow("Email content cannot contain <mj-include>");
+  });
+
   it("contains Resend unsubscribe placeholder", () => {
     const html = EmailPage({
       title: "My First Issue",
