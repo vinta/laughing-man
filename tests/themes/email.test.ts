@@ -101,6 +101,18 @@ describe("EmailPage", () => {
     expect(html).toContain("</table>");
   });
 
+  it("uses a wider desktop reading width while staying responsive", () => {
+    const html = EmailPage({
+      title: "My First Issue",
+      issue: 1,
+      content: "<p>Hello</p>",
+      config: testConfig,
+    });
+
+    expect(html).toContain("max-width:680px");
+    expect(html).toContain('style="width:680px;"');
+  });
+
   it("escapes HTML in config name and URL", () => {
     const evilConfig = {
       ...testConfig,

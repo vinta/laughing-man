@@ -2,6 +2,8 @@ import mjml2html from "mjml";
 import type { IssueProps } from "../../src/types.js";
 import { escapeHtml } from "./escape.js";
 
+const EMAIL_BODY_WIDTH = 680;
+
 export function EmailPage({ title, issue, content, config }: IssueProps): string {
   const escapedTitle = escapeHtml(title);
   const name = escapeHtml(config.name);
@@ -9,14 +11,14 @@ export function EmailPage({ title, issue, content, config }: IssueProps): string
 
   const mjml = `
 <mjml>
-  <mj-head>
-    <mj-title>${escapedTitle}</mj-title>
-    <mj-attributes>
-      <mj-all font-family="Georgia, 'Times New Roman', serif" color="#1a1a1a" />
-      <mj-text line-height="1.7" font-size="16px" />
-    </mj-attributes>
-  </mj-head>
-  <mj-body background-color="#ffffff">
+    <mj-head>
+      <mj-title>${escapedTitle}</mj-title>
+      <mj-attributes>
+        <mj-all font-family="Georgia, 'Times New Roman', serif" color="#1a1a1a" />
+        <mj-text line-height="1.7" font-size="16px" />
+      </mj-attributes>
+    </mj-head>
+  <mj-body background-color="#ffffff" width="${EMAIL_BODY_WIDTH}px">
     <mj-section padding="32px 24px 0">
       <mj-column>
         <mj-text padding-bottom="16px">

@@ -72,6 +72,40 @@ describe("processImages", () => {
     expect(result.emailHtml).toContain('src="https://cdn.example.com/photo.jpg"');
   });
 
+  it("adds responsive constraints to email images", async () => {
+    const imgPath = join(tmpDir, "issues", "cover.jpg");
+    writeFileSync(imgPath, "fake-image-data");
+
+    const html = `<p><img src="cover.jpg" alt="Cover"></p>`;
+    const result = await processImages({
+      html,
+      issueNumber: 1,
+      markdownFilePath: join(tmpDir, "issues", "issue-1.md"),
+      attachmentsDir: undefined,
+      outputDir,
+      siteUrl: "https://example.com",
+    });
+
+    expect(result.webHtml).toBe(`<p><img src="/images/1/cover.jpg" alt="Cover"></p>`);
+    expect(result.emailHtml).toContain('width="100%"');
+    expect(result.emailHtml).toContain('style="display:block;max-width:100%;height:auto;"');
+  });
+
+  it("preserves explicit image widths while adding responsive styles for email", async () => {
+    const html = `<img src="https://cdn.example.com/photo.jpg" width="320" style="border-radius:8px;">`;
+    const result = await processImages({
+      html,
+      issueNumber: 1,
+      markdownFilePath: join(tmpDir, "issues", "issue-1.md"),
+      attachmentsDir: undefined,
+      outputDir,
+      siteUrl: "https://example.com",
+    });
+
+    expect(result.emailHtml).toContain('width="320"');
+    expect(result.emailHtml).toContain('style="border-radius:8px;display:block;max-width:100%;height:auto;"');
+  });
+
   it("resolves Obsidian-style paths where src includes a folder that matches attachments_dir", async () => {
     const imgPath = join(tmpDir, "Attachments", "photo.jpg");
     writeFileSync(imgPath, "fake-image-data");
@@ -159,6 +193,7 @@ describe("processImages", () => {
     expect(result.emailHtml).toContain('href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"');
     expect(result.emailHtml).toContain('src="https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg"');
     expect(result.emailHtml).toContain('alt="YouTube video player"');
+    expect(result.emailHtml).toContain('style="max-width:100%;border-radius:8px;display:block;max-width:100%;height:auto;"');
   });
 
   it("handles youtube-nocookie.com iframe", async () => {

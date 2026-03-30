@@ -15,6 +15,8 @@ interface ProcessImagesResult {
   emailHtml: string;
 }
 
+const EMAIL_IMAGE_STYLE = "display:block;max-width:100%;height:auto;";
+
 function resolveImagePath(
   src: string,
   markdownFilePath: string,
@@ -38,6 +40,29 @@ function resolveImagePath(
   }
 
   return null;
+}
+
+function appendInlineStyle(tag: string, styleToAppend: string): string {
+  const styleAttr = tag.match(/\sstyle="([^"]*)"/i);
+  if (!styleAttr) {
+    return tag.replace(/<img\b/i, `<img style="${styleToAppend}"`);
+  }
+
+  const existing = styleAttr[1].trim();
+  const separator = existing.length > 0 && !existing.endsWith(";") ? ";" : "";
+  return tag.replace(styleAttr[0], ` style="${existing}${separator}${styleToAppend}"`);
+}
+
+function makeEmailImagesResponsive(html: string): string {
+  return html.replace(/<img\b[^>]*>/gi, (tag) => {
+    let responsiveTag = tag;
+
+    if (!/\swidth\s*=/i.test(responsiveTag)) {
+      responsiveTag = responsiveTag.replace(/<img\b/i, '<img width="100%"');
+    }
+
+    return appendInlineStyle(responsiveTag, EMAIL_IMAGE_STYLE);
+  });
 }
 
 export async function processImages(
@@ -116,6 +141,8 @@ export async function processImages(
 
     emailHtml = emailHtml.replace(fullTag, thumbnail);
   }
+
+  emailHtml = makeEmailImagesResponsive(emailHtml);
 
   return { webHtml, emailHtml };
 }
