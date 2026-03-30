@@ -5,6 +5,7 @@ import { runPreview } from "./commands/preview.js";
 import { runDeploy } from "./commands/deploy.js";
 import { runSend } from "./commands/send.js";
 import { runSetupWeb } from "./commands/setup-web.js";
+import { runStamp } from "./commands/stamp.js";
 
 const args = process.argv.slice(2);
 const configDir = process.cwd();
@@ -26,6 +27,7 @@ Commands:
   setup web         Create Cloudflare Pages project + custom domain + DNS
   build             Validate + build site and email HTML
   preview           Build (including drafts) + start local preview server
+  stamp             Add frontmatter to .md files that don't have it
   deploy            Deploy output/website/ to Cloudflare Pages
   send <issue>      Send an issue via Resend Broadcast
 
@@ -95,6 +97,35 @@ Create a Cloudflare Pages project with custom domain and DNS.
 `);
         }
         await runSetupWeb({ configDir });
+        break;
+      }
+
+      case "stamp": {
+        if (wantsHelp) {
+          showHelp(`Usage: laughing-man stamp
+
+Add frontmatter to .md files that don't have it.
+Infers issue numbers from filenames, headings, or file creation time.
+All stamped issues are set to 'draft' status.
+`);
+        }
+        const config = await loadConfig(configDir);
+        const results = await runStamp(config.issues_dir);
+
+        for (const s of results.stamped) {
+          console.log(`stamped ${s.filename} (issue: ${s.issue}, status: draft)`);
+          if (s.warning) console.log(`  warning: ${s.warning}`);
+        }
+        for (const s of results.skipped) {
+          console.log(`skipped ${s.filename} (already has frontmatter)`);
+        }
+
+        const count = results.stamped.length;
+        if (count > 0) {
+          console.log(`\nStamped ${count} file(s). Run \`laughing-man build\` to generate your newsletter.`);
+        } else {
+          console.log("No files needed stamping.");
+        }
         break;
       }
 

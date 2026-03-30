@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import { inferIssueNumber, runStamp } from "../../src/commands/stamp";
+import { loadConfig } from "../../src/pipeline/config";
 import { mkdtempSync, writeFileSync, readFileSync, rmSync, utimesSync } from "node:fs";
 import { join } from "node:path";
 import os from "node:os";
@@ -168,5 +169,42 @@ describe("runStamp", () => {
     expect(results.stamped[0].filename).toBe("01-hello.md");
     expect(results.stamped[0].issue).toBe(1);
     expect(results.skipped[0].filename).toBe("02-existing.md");
+  });
+});
+
+describe("stamp CLI integration", () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = mkdtempSync(join(os.tmpdir(), "lm-stamp-cli-"));
+    const config = `
+name: "Test Newsletter"
+issues_dir: .
+web_hosting:
+  provider: cloudflare-pages
+  project: my-newsletter
+email_hosting:
+  from: "Test <test@example.com>"
+  provider: resend
+env: {}
+`.trim();
+    writeFileSync(join(tmpDir, "laughing-man.yaml"), config);
+  });
+
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("stamps files found via config issues_dir", async () => {
+    writeFileSync(join(tmpDir, "01-hello.md"), "# Hello\n");
+
+    const config = await loadConfig(tmpDir);
+    const results = await runStamp(config.issues_dir);
+
+    expect(results.stamped).toHaveLength(1);
+    expect(results.stamped[0].issue).toBe(1);
+
+    const content = readFileSync(join(tmpDir, "01-hello.md"), "utf8");
+    expect(content).toStartWith("---\nissue: 1\nstatus: draft\n---\n");
   });
 });
