@@ -13,7 +13,7 @@ Check current state and skip completed steps:
 
 - `laughing-man.yaml` exists with real values (not placeholders)? Skip steps 1-2.
 - `.env` has `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`? Skip steps 3-4.
-- `.env` has `RESEND_API_KEY` and `RESEND_AUDIENCE_ID`, and Pages secrets are set? Skip steps 5-6.
+- `.env` has `RESEND_API_KEY` and Pages secret is set? Skip steps 5-6.
 - `.md` issue files already exist? Skip step 8.
 
 Tell the user which steps you're skipping and why, then start from the first incomplete step.
@@ -90,7 +90,7 @@ These env vars are used by both `setup web` (Cloudflare SDK) and `deploy` (wrang
 
 ### 5. Set up Resend
 
-Walk the user through creating an API key and audience:
+Walk the user through creating an API key:
 
 1. Go to https://resend.com/signup (or https://resend.com/login if they have an account)
 2. **Verify a sending domain:**
@@ -106,11 +106,6 @@ Walk the user through creating an API key and audience:
    - Name: `laughing-man`
    - Permission: **"Full access"** (required because the subscribe function creates contacts in an audience, which is a resource operation, not just sending)
    - Save the key (shown only once)
-4. **Create an audience:**
-   - Go to https://resend.com/audiences
-   - "Create Audience"
-   - Name: the newsletter name (e.g., "The Laughing Man")
-   - Copy the Audience ID (a string like `aud_...`)
 
 ### 6. Save Resend credentials
 
@@ -118,17 +113,15 @@ Add to `.env` in the newsletter directory:
 
 ```
 RESEND_API_KEY=<key>
-RESEND_AUDIENCE_ID=<audience-id>
 ```
 
-Then set them as **secrets** on the Cloudflare Pages project so the subscribe function can access them in production:
+Then set it as a **secret** on the Cloudflare Pages project so the subscribe function can access it in production:
 
 ```bash
 bunx wrangler pages secret put RESEND_API_KEY --project-name <project>
-bunx wrangler pages secret put RESEND_AUDIENCE_ID --project-name <project>
 ```
 
-Paste each value when prompted. No redeployment is needed. Secrets take effect immediately.
+Paste the value when prompted. No redeployment is needed. Secrets take effect immediately.
 
 ### 7. Run setup web
 
@@ -214,5 +207,5 @@ bunx @vinta/laughing-man preview --no-drafts  # published issues only
 | "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Managed records can't be deleted from the DNS page directly. Delete the Worker or Pages project that owns the record under Workers & Pages in the dashboard, or use a different domain/subdomain. |
 | Deploy fails with "wrangler not found"  | Run `bun add -D wrangler`                                                                |
 | Custom domain shows 522 error           | Wait for DNS propagation (up to 48h), verify CNAME is correct                            |
-| Subscribe form returns "Failed to subscribe" | Resend secrets not set on Pages project. Run `bunx wrangler pages secret put RESEND_API_KEY --project-name <project>` and same for `RESEND_AUDIENCE_ID`. Verify with `bunx wrangler pages secret list --project-name <project>`. |
+| Subscribe form returns "Failed to subscribe" | Resend secret not set on Pages project. Run `bunx wrangler pages secret put RESEND_API_KEY --project-name <project>`. Verify with `bunx wrangler pages secret list --project-name <project>`. |
 | Subscribe form returns "Invalid request" | Request body is not valid JSON or missing `email` field. Check browser console for errors. |
