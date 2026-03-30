@@ -107,6 +107,8 @@ Walk the user through creating an API key:
    - Permission: **"Full access"** (required because the subscribe function creates contacts, which is a resource operation, not just sending)
    - Save the key (shown only once)
 
+No audience or segment setup is needed. Resend creates a default "General" segment that includes all contacts. The `send` command auto-discovers segments at runtime.
+
 ### 6. Save Resend credentials
 
 Add to `.env` in the newsletter directory:
