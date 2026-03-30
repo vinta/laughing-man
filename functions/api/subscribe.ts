@@ -2,7 +2,6 @@
 
 interface Env {
   RESEND_API_KEY: string;
-  RESEND_AUDIENCE_ID: string;
 }
 
 interface SubscribeBody {
@@ -30,11 +29,10 @@ export async function handleSubscribe(
 
   console.log("[subscribe] calling Resend API", {
     hasApiKey: !!env.RESEND_API_KEY,
-    hasAudienceId: !!env.RESEND_AUDIENCE_ID,
   });
 
   const res = await fetch(
-    `https://api.resend.com/audiences/${env.RESEND_AUDIENCE_ID}/contacts`,
+    "https://api.resend.com/contacts",
     {
       method: "POST",
       headers: {

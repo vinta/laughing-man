@@ -4,7 +4,6 @@ import { handleSubscribe, onRequestPost } from "../../functions/api/subscribe";
 describe("handleSubscribe", () => {
   const mockEnv = {
     RESEND_API_KEY: "re_test_key",
-    RESEND_AUDIENCE_ID: "aud_test_id",
   };
 
   it("returns 400 if email is missing", async () => {
@@ -34,7 +33,7 @@ describe("handleSubscribe", () => {
       expect(body.ok).toBe(true);
 
       expect(globalThis.fetch).toHaveBeenCalledWith(
-        "https://api.resend.com/audiences/aud_test_id/contacts",
+        "https://api.resend.com/contacts",
         expect.objectContaining({
           method: "POST",
           headers: expect.objectContaining({
@@ -70,7 +69,7 @@ describe("handleSubscribe", () => {
 });
 
 describe("onRequestPost", () => {
-  function makeContext(body: unknown, env = { RESEND_API_KEY: "re_test", RESEND_AUDIENCE_ID: "aud_test" }) {
+  function makeContext(body: unknown, env = { RESEND_API_KEY: "re_test" }) {
     return {
       request: new Request("https://example.com/api/subscribe", {
         method: "POST",
