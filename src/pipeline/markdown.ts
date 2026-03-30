@@ -56,5 +56,26 @@ export async function parseIssueFile(filePath: string): Promise<IssueData> {
 
 export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
   const files = readdirSync(issuesDir).filter((f) => extname(f) === ".md");
+
+  if (files.length === 0) {
+    throw new Error(
+      "No issues found. Run `laughing-man stamp` to add frontmatter to your .md files."
+    );
+  }
+
+  // Check if ALL files are bare markdown (no frontmatter at all).
+  // If so, suggest `stamp` instead of throwing cryptic per-file errors.
+  const allBare = files.every((f) => {
+    const raw = readFileSync(join(issuesDir, f), "utf8");
+    return Object.keys(matter(raw).data).length === 0;
+  });
+
+  if (allBare) {
+    throw new Error(
+      "No issues found. Run `laughing-man stamp` to add frontmatter to your .md files."
+    );
+  }
+
+  // Normal path: parse all files, let individual errors surface
   return Promise.all(files.map((f) => parseIssueFile(join(issuesDir, f))));
 }

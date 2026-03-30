@@ -244,8 +244,20 @@ describe("scanIssuesDir", () => {
     expect(issues.map((i) => i.issue).sort()).toEqual([1, 2]);
   });
 
-  it("returns empty array for empty directory", async () => {
-    const issues = await scanIssuesDir(tmpDir);
-    expect(issues).toHaveLength(0);
+  it("throws suggesting stamp when all .md files lack valid frontmatter", async () => {
+    writeFileSync(join(tmpDir, "hello.md"), "# Just markdown\n\nNo frontmatter.\n");
+    writeFileSync(join(tmpDir, "world.md"), "# Another file\n");
+
+    await expect(scanIssuesDir(tmpDir)).rejects.toThrow("laughing-man stamp");
+  });
+
+  it("throws suggesting stamp when directory has no .md files", async () => {
+    writeFileSync(join(tmpDir, "notes.txt"), "not markdown");
+
+    await expect(scanIssuesDir(tmpDir)).rejects.toThrow("laughing-man stamp");
+  });
+
+  it("throws suggesting stamp for empty directory", async () => {
+    await expect(scanIssuesDir(tmpDir)).rejects.toThrow("laughing-man stamp");
   });
 });
