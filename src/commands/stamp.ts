@@ -1,4 +1,6 @@
-import { basename } from "node:path";
+import { readFileSync, readdirSync, writeFileSync, statSync } from "node:fs";
+import { join, extname, basename } from "node:path";
+import matter from "@11ty/gray-matter";
 
 interface InferResult {
   issue: number;
@@ -27,4 +29,115 @@ export function inferIssueNumber(
   }
 
   return null;
+}
+
+interface StampResult {
+  filename: string;
+  issue: number;
+  warning?: string;
+}
+
+interface StampOutput {
+  stamped: StampResult[];
+  skipped: Array<{ filename: string }>;
+}
+
+function extractHeading(content: string): string {
+  const stripped = content.replace(/^```[\s\S]*?^```/gm, "");
+  const match = stripped.match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : "";
+}
+
+export async function runStamp(issuesDir: string): Promise<StampOutput> {
+  const files = readdirSync(issuesDir)
+    .filter((f) => extname(f) === ".md");
+
+  const toStamp: Array<{
+    filename: string;
+    content: string;
+    birthtime: Date;
+    inferred: InferResult | null;
+  }> = [];
+  const skipped: Array<{ filename: string }> = [];
+
+  for (const filename of files) {
+    const filePath = join(issuesDir, filename);
+    const raw = readFileSync(filePath, "utf8");
+    const { data, content } = matter(raw);
+
+    if (Object.keys(data).length > 0) {
+      skipped.push({ filename });
+      continue;
+    }
+
+    const heading = extractHeading(content);
+    const inferred = inferIssueNumber(filename, heading);
+    const stat = statSync(filePath);
+
+    toStamp.push({
+      filename,
+      content: raw,
+      birthtime: stat.birthtime,
+      inferred,
+    });
+  }
+
+  // Resolve issue numbers: collect claimed numbers, handle duplicates
+  const claimed = new Map<number, { filename: string; birthtime: Date }>();
+  const needsFallback: typeof toStamp = [];
+
+  // First pass: collect all inferred numbers, detect duplicates
+  for (const file of toStamp) {
+    if (!file.inferred) {
+      needsFallback.push(file);
+      continue;
+    }
+
+    const num = file.inferred.issue;
+    const existing = claimed.get(num);
+
+    if (!existing) {
+      claimed.set(num, { filename: file.filename, birthtime: file.birthtime });
+    } else if (file.birthtime < existing.birthtime) {
+      // This file is older, it keeps the number; existing goes to fallback
+      const displaced = toStamp.find((f) => f.filename === existing.filename)!;
+      needsFallback.push(displaced);
+      claimed.set(num, { filename: file.filename, birthtime: file.birthtime });
+    } else {
+      // Existing file is older, this one goes to fallback
+      needsFallback.push(file);
+    }
+  }
+
+  // Sort fallback files by birthtime
+  needsFallback.sort((a, b) => a.birthtime.getTime() - b.birthtime.getTime());
+
+  // Assign fallback numbers
+  const fallbackAssignments = new Map<string, number>();
+  for (const file of needsFallback) {
+    let next = 1;
+    while (claimed.has(next)) next++;
+    claimed.set(next, { filename: file.filename, birthtime: file.birthtime });
+    fallbackAssignments.set(file.filename, next);
+  }
+
+  // Write frontmatter to files
+  const stamped: StampResult[] = [];
+
+  for (const file of toStamp) {
+    const fallbackNum = fallbackAssignments.get(file.filename);
+    const issue = fallbackNum ?? file.inferred!.issue;
+    const warning = fallbackNum !== undefined
+      ? "issue number guessed from file creation time"
+      : undefined;
+
+    const frontmatter = `---\nissue: ${issue}\nstatus: draft\n---\n\n`;
+    writeFileSync(join(issuesDir, file.filename), frontmatter + file.content);
+
+    stamped.push({ filename: file.filename, issue, warning });
+  }
+
+  stamped.sort((a, b) => a.issue - b.issue);
+
+  return { stamped, skipped };
 }
