@@ -137,7 +137,7 @@ export async function processImages(
     const rawAlt = titleMatch ? titleMatch[1] : "YouTube video";
     const alt = rawAlt.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-    const thumbnail = `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank"><img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${alt}" width="560" style="max-width:100%;border-radius:8px;" /></a>`;
+    const thumbnail = `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank"><img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${alt}" width="100%" style="width:100%;max-width:100%;border-radius:8px;" /></a>`;
 
     emailHtml = emailHtml.replace(fullTag, thumbnail);
   }

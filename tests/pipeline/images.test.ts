@@ -193,7 +193,8 @@ describe("processImages", () => {
     expect(result.emailHtml).toContain('href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"');
     expect(result.emailHtml).toContain('src="https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg"');
     expect(result.emailHtml).toContain('alt="YouTube video player"');
-    expect(result.emailHtml).toContain('style="max-width:100%;border-radius:8px;display:block;max-width:100%;height:auto;"');
+    expect(result.emailHtml).toContain('width="100%"');
+    expect(result.emailHtml).toContain('style="width:100%;max-width:100%;border-radius:8px;display:block;max-width:100%;height:auto;"');
   });
 
   it("handles youtube-nocookie.com iframe", async () => {
@@ -212,6 +213,7 @@ describe("processImages", () => {
     expect(result.emailHtml).toContain('href="https://www.youtube.com/watch?v=WB-ik-Bpl0c"');
     expect(result.emailHtml).toContain('src="https://img.youtube.com/vi/WB-ik-Bpl0c/hqdefault.jpg"');
     expect(result.emailHtml).toContain('alt="My Video"');
+    expect(result.emailHtml).toContain('width="100%"');
   });
 
   it("uses default alt text when iframe has no title", async () => {
