@@ -102,7 +102,7 @@ export async function runSend(options: SendOptions): Promise<void> {
     segmentId,
     from: config.email_hosting.from,
     replyTo: config.email_hosting.reply_to,
-    subject: `${issue.title}`,
+    subject: issue.title,
     html,
     name: broadcastName,
   });

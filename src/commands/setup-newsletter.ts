@@ -73,7 +73,7 @@ export async function runSetupNewsletter(
   const apiKey = config.env.RESEND_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "Resend API key not found. Set RESEND_API_KEY env var or add it to laughing-man.yaml",
+      "RESEND_API_KEY is not configured. Set RESEND_API_KEY env var or add it to laughing-man.yaml.",
     );
   }
 

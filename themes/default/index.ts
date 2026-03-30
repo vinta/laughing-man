@@ -50,7 +50,7 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
   const allItems = teaserItems + feedItems;
 
   return `<!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

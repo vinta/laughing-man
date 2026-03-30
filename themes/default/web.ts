@@ -11,7 +11,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
   const favicon = readFileSync(faviconPath, "utf8");
   const faviconDataUri = `data:image/svg+xml,${encodeURIComponent(favicon)}`;
   return `<!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
