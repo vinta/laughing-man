@@ -16,7 +16,7 @@ interface ContactRecord {
   unsubscribed?: boolean;
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 function resendHeaders(apiKey: string): HeadersInit {
   return { Authorization: `Bearer ${apiKey}` };
