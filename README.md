@@ -77,7 +77,8 @@ env:
   - Zone Resources:
     - `Include | Specific zone | example.com`
 - Get your Resend API key from [resend.com/api-keys](https://resend.com/api-keys)
-  - Permission: **Full access** (required because the subscribe function creates contacts, not just sends email)
+  - Permission: **Full access**
+    - Because the subscribe function creates contacts, not just sends email
 
 ### Deploy
 
