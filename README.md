@@ -81,15 +81,15 @@ attachments_dir: .
 
 web_hosting:
   provider: cloudflare-pages
-  project: laughing-man
-  # domain: newsletter.example.com
+  project: your-newsletter-name
+  # domain: example.com
 
 email_hosting:
+  provider: resend
   from: "Your Name <newsletter@example.com>"
   reply_to: newsletter@example.com
-  provider: resend
 
 env:
-  CLOUDFLARE_API_TOKEN: "xxx" # or set CLOUDFLARE_API_TOKEN env var
-  RESEND_API_KEY: "xxx" # or set RESEND_API_KEY env var
+  CLOUDFLARE_API_TOKEN: "cf_xxxxx" # or set CLOUDFLARE_API_TOKEN env var
+  RESEND_API_KEY: "re_xxxxx" # or set RESEND_API_KEY env var
 ```
