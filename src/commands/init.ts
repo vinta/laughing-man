@@ -8,7 +8,7 @@ import {
 } from "node:fs";
 import { join, dirname } from "node:path";
 
-const TEMPLATE = `
+const CONFIG_TEMPLATE = `
 name: Your Newsletter Name
 description: A newsletter by [Your Name](https://blog.example.com)
 issues_dir: .
@@ -38,7 +38,7 @@ export async function runInit(targetDir: string): Promise<void> {
     );
   }
 
-  writeFileSync(configPath, TEMPLATE.trimStart(), "utf8");
+  writeFileSync(configPath, CONFIG_TEMPLATE.trimStart(), "utf8");
   console.log(`Created laughing-man.yaml`);
 
   const gitignorePath = join(targetDir, ".gitignore");
