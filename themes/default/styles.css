@@ -38,6 +38,7 @@ body {
   isolation: isolate;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-autospace: normal;
 }
 
 /* ─── Digital corridor background ─── */
@@ -142,8 +143,8 @@ strong {
 
 .site-name {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
-  letter-spacing: 0.12em;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
   color: var(--text);
 }
 
@@ -158,8 +159,8 @@ strong {
 
 .site-nav a {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
   color: var(--text-muted);
 }
 
@@ -413,51 +414,58 @@ strong {
   font-family: var(--font-mono);
   font-size: 0.82rem;
   letter-spacing: 0.06em;
-  color: var(--text-muted);
-  transition: color 0.2s ease;
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  text-underline-offset: 0.16em;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 .issue-back a:hover {
-  color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 
 /* ─── Footer ─── */
 
 .site-footer {
   margin-block-start: auto;
-  padding: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 4vw, 2.5rem);
-  text-align: center;
+  padding: clamp(1rem, 2vw, 1.5rem) clamp(1.25rem, 4vw, 2.5rem);
   background: var(--bg-surface);
   border-block-start: 1px solid var(--line);
-  display: grid;
-  gap: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
 }
 
 .footer-name {
-  margin: 0;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   letter-spacing: 0.06em;
   color: var(--text-muted);
 }
 
+.footer-sep {
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
 .footer-credit {
-  margin: 0;
   font-family: var(--font-mono);
-  font-size: 0.74rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
 }
 
 .footer-credit a {
-  color: inherit;
-  text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
   text-underline-offset: 0.16em;
   transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 .footer-credit a:hover {
-  color: var(--accent);
-  text-decoration-color: currentColor;
+  text-decoration-color: var(--accent);
 }
 
 /* ─── Issue: Hero ─── */
@@ -555,15 +563,9 @@ strong {
 .issue-body {
   max-inline-size: var(--reading-width);
   margin-inline: auto;
-  font-family: var(--font-sans);
+  font-family: sans-serif;
   font-size: 1.125rem;
   line-height: 1.75;
-}
-
-.issue-body > p:first-of-type {
-  font-size: clamp(1.18rem, 1.6vw, 1.35rem);
-  line-height: 1.7;
-  color: var(--text);
 }
 
 .issue-body > h1:first-of-type {

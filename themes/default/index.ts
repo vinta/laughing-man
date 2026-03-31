@@ -1,8 +1,10 @@
-import { readFileSync } from "node:fs";
 import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
+import { readStyles, readFaviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
-import { laughingManLogo } from "./logo.js";
+import { readLaughingManLogo } from "./logo.js";
+import { siteHeader, siteFooter } from "./layout.js";
+import { subscribeScript } from "./subscribe.js";
 
 interface IndexProps {
   issues: IssueData[];
@@ -10,13 +12,7 @@ interface IndexProps {
   config: SiteConfig;
 }
 
-const stylesPath = new URL("styles.css", import.meta.url).pathname;
-const faviconPath = new URL("favicon.svg", import.meta.url).pathname;
-
 export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps): string {
-  const styles = readFileSync(stylesPath, "utf8");
-  const favicon = readFileSync(faviconPath, "utf8");
-  const faviconDataUri = `data:image/svg+xml,${encodeURIComponent(favicon)}`;
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
 
   const feedItems = sorted
@@ -50,29 +46,23 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
   const allItems = teaserItems + feedItems;
 
   return `<!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(config.name)}</title>
-  <link rel="icon" type="image/svg+xml" href="${faviconDataUri}">
+  <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>${styles}</style>
+  <style>${readStyles()}</style>
 </head>
 <body>
-  <header class="site-header">
-    <a class="site-name" href="/">${escapeHtml(config.name)}</a>
-    <nav class="site-nav">
-      <a href="#subscribe">Subscribe</a>
-      <a href="#archive">Archives</a>
-    </nav>
-  </header>
+  ${siteHeader(config.name)}
   <main>
     <section class="hero">
       <div class="hero-emblem" aria-hidden="true">
-        ${laughingManLogo}
+        ${readLaughingManLogo()}
       </div>
       <h1>${escapeHtml(config.name)}</h1>
       <div class="hero-summary">
@@ -95,73 +85,8 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
       ${feedItems ? '<p class="feed-end">End of Archives</p>' : ""}
     </section>
   </main>
-  <footer class="site-footer">
-    <p class="footer-name">${escapeHtml(config.name)}</p>
-    <p class="footer-credit">
-      Created with
-      <a href="https://github.com/sadcoderlabs/laughing-man" target="_blank" rel="noopener noreferrer">laughing-man</a>
-    </p>
-  </footer>
-  <script>
-    const subscribeSection = document.getElementById('subscribe');
-    const subscribeForm = document.getElementById('subscribe-form');
-    const subscribeInput = document.getElementById('email');
-
-    function focusSubscribe() {
-      window.history.replaceState(null, '', '#subscribe');
-      const previousScrollBehavior = document.documentElement.style.scrollBehavior;
-      document.documentElement.style.scrollBehavior = 'auto';
-      subscribeSection.scrollIntoView({ block: 'center' });
-      document.documentElement.style.scrollBehavior = previousScrollBehavior;
-      subscribeInput.focus({ preventScroll: true });
-      subscribeInput.select();
-      subscribeForm.classList.remove('is-targeted');
-      void subscribeForm.offsetWidth;
-      subscribeForm.classList.add('is-targeted');
-      setTimeout(() => subscribeForm.classList.remove('is-targeted'), 1200);
-    }
-
-    document.querySelectorAll('a[href="#subscribe"]').forEach((link) => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        focusSubscribe();
-      });
-    });
-
-    subscribeForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const msg = document.getElementById('subscribe-message');
-      const email = form.email.value;
-      form.querySelector('button').disabled = true;
-      try {
-        const res = await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
-        const data = await res.json();
-        if (data.ok) {
-          msg.textContent =
-            data.result === 'already_subscribed'
-              ? "You're already subscribed."
-              : data.result === 'resubscribed'
-                ? "Welcome back — you're subscribed again."
-                : 'Subscribed';
-          msg.className = 'subscribe-message success';
-          form.reset();
-        } else {
-          msg.textContent = data.error || 'something went wrong';
-          msg.className = 'subscribe-message error';
-        }
-      } catch {
-        msg.textContent = 'Something went wrong';
-        msg.className = 'subscribe-message error';
-      }
-      msg.hidden = false;
-      form.querySelector('button').disabled = false;
-    });
-  </script>
+  ${siteFooter(config.name)}
+  ${subscribeScript({ formId: "subscribe-form", inputId: "email", messageId: "subscribe-message" })}
 </body>
 </html>`;
 }

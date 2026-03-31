@@ -82,7 +82,7 @@ attachments_dir: .
 web_hosting:
   provider: cloudflare-pages
   project: laughing-man
-  # domain: example.com
+  # domain: newsletter.example.com
 
 email_hosting:
   from: "Your Name <newsletter@example.com>"

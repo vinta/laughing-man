@@ -142,7 +142,7 @@ All stamped issues are set to 'draft' status.
 
         const count = results.stamped.length;
         if (count > 0) {
-          console.log(`\nStamped ${count} file(s). Run \`laughing-man build\` to generate your newsletter.`);
+          console.log(`\nStamped ${count} file(s). Run 'laughing-man build' to generate your newsletter.`);
         } else {
           console.log("No files needed stamping.");
         }

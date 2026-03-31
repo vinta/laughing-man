@@ -1,6 +1,5 @@
 import { watch, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { loadConfig } from "../pipeline/config.js";
 import { runBuild } from "./build.js";
 import { handleSubscribe } from "../../functions/api/subscribe.js";
 
@@ -12,9 +11,7 @@ interface PreviewOptions {
 export async function runPreview(options: PreviewOptions): Promise<void> {
   const { configDir, includeDrafts } = options;
 
-  await runBuild({ configDir, includeDrafts });
-
-  const config = await loadConfig(configDir);
+  const { config } = await runBuild({ configDir, includeDrafts });
   const websiteDir = resolve(configDir, "output", "website");
   const emailDir = resolve(configDir, "output", "email");
   const themesDir = resolve(import.meta.dirname, "../../themes/default");

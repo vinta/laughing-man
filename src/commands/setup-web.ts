@@ -12,7 +12,7 @@ interface SetupWebOptions {
   configDir: string;
 }
 
-export async function runSetupWeb(options: SetupWebOptions) {
+export async function runSetupWeb(options: SetupWebOptions): Promise<void> {
   const config = await loadConfig(options.configDir);
 
   const apiToken = config.env.CLOUDFLARE_API_TOKEN;
