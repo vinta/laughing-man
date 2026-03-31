@@ -1,4 +1,4 @@
-import { $ } from "bun";
+import { spawnSync } from "node:child_process";
 import { runBuild } from "./build.js";
 
 interface DeployOptions {
@@ -20,18 +20,23 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
   }
 
   const project = config.web_hosting.project;
-  const token = config.env.CLOUDFLARE_API_TOKEN;
 
   console.log(`Deploying to Cloudflare Pages (${project})...`);
 
-  const { exitCode } = await $`CLOUDFLARE_API_TOKEN=${token} bunx wrangler pages deploy website --project-name=${project}`
-    .cwd(outputDir)
-    .nothrow();
+  const result = spawnSync(
+    "npx",
+    ["--yes", "wrangler", "pages", "deploy", "website", `--project-name=${project}`],
+    {
+      cwd: outputDir,
+      stdio: "inherit",
+      env: { ...process.env, CLOUDFLARE_API_TOKEN: config.env.CLOUDFLARE_API_TOKEN },
+    },
+  );
 
-  if (exitCode !== 0) {
+  if (result.status !== 0) {
     throw new Error(
-      `wrangler pages deploy failed with exit code ${exitCode}.\n` +
-        `If wrangler is not installed, run: bun add -D wrangler`,
+      `wrangler pages deploy failed with exit code ${result.status}.\n` +
+        `If wrangler is not installed, run: npm install -D wrangler`,
     );
   }
 
