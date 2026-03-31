@@ -95,8 +95,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cpSync(functionsSource, join(outputDir, "functions"), { recursive: true });
   }
 
-  const readyCount = sorted.length;
-  const draftCount = allIssues.length - issues.length;
+  const readyCount = allIssues.filter((i) => i.status === "ready").length;
+  const draftCount = allIssues.filter((i) => i.status === "draft").length;
   const parts = [];
   if (readyCount > 0) parts.push(`${readyCount} ready`);
   if (draftCount > 0) parts.push(`${draftCount} draft`);
