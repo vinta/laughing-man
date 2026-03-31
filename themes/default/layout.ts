@@ -8,7 +8,8 @@ interface SiteHeaderOptions {
 export function siteHeader(name: string, options: SiteHeaderOptions = {}): string {
   const archiveHref = options.archiveHref ?? "#archive";
   const subscribeHref = options.subscribeHref ?? "#subscribe";
-  return `<header class="site-header">
+  return `<a class="skip-link visually-hidden" href="#main-content">Skip to content</a>
+  <header class="site-header">
     <a class="site-name" href="/">${escapeHtml(name)}</a>
     <nav class="site-nav">
       <a href="${subscribeHref}">Subscribe</a>

@@ -70,7 +70,7 @@ export function IndexPage({
 </head>
 <body>
   ${siteHeader(config.name)}
-  <main>
+  <main id="main-content">
     <section class="hero">
       <div class="hero-emblem" aria-hidden="true">
         ${readLaughingManLogo()}

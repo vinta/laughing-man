@@ -35,7 +35,7 @@ export function WebPage({ title, issue, date, rawContent, content, config }: Web
 </head>
 <body class="issue-page">
   ${siteHeader(config.name, { archiveHref: "/#archive" })}
-  <main class="issue-main">
+  <main id="main-content" class="issue-main">
     <section class="issue-hero">
       <div class="issue-emblem" aria-hidden="true">
         ${readLaughingManLogo()}

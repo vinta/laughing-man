@@ -847,6 +847,27 @@ del {
   border: 0;
 }
 
+.skip-link:focus {
+  position: fixed;
+  inset-block-start: 0.5rem;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  inline-size: auto;
+  block-size: auto;
+  padding: 0.5rem 1.2rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--bg-surface);
+  background: var(--accent);
+  border-radius: 0.25rem;
+}
+
 /* ─── Animations ─── */
 
 @keyframes fade-up {

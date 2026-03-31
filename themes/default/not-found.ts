@@ -23,7 +23,7 @@ export function NotFoundPage({ config }: NotFoundProps): string {
 </head>
 <body class="not-found-page">
   ${siteHeader(config.name, { archiveHref: "/#archive", subscribeHref: "/#subscribe" })}
-  <main class="not-found-main">
+  <main id="main-content" class="not-found-main">
     <section class="not-found-hero" aria-labelledby="not-found-title">
       <p class="not-found-kicker">404</p>
       <div class="not-found-emblem" aria-hidden="true">
