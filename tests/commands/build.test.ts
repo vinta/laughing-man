@@ -195,7 +195,7 @@ env: {}
     expect(notFoundHtml).toContain("This page does not exist");
     expect(notFoundHtml).toContain("Go to homepage");
     expect(notFoundHtml).toContain('href="/"');
-    expect(notFoundHtml).toContain("Browse archives");
+    expect(notFoundHtml).toContain("Archives");
     expect(notFoundHtml).toContain('href="/#archive"');
   });
 
