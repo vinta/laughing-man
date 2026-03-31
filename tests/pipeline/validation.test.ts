@@ -1,5 +1,8 @@
-import { describe, expect, it } from "bun:test";
-import { validateIssues } from "../../src/pipeline/validation";
+import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import os from "node:os";
+import { backfillDates, validateIssues } from "../../src/pipeline/validation";
 import type { IssueData } from "../../src/types";
 
 function makeIssue(overrides: Partial<IssueData> = {}): IssueData {
@@ -70,5 +73,50 @@ describe("validateIssues", () => {
   it("accepts draft issues without a date", () => {
     const issues = [makeIssue({ status: "draft", date: undefined })];
     expect(() => validateIssues(issues)).not.toThrow();
+  });
+});
+
+describe("backfillDates", () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = mkdtempSync(join(os.tmpdir(), "lm-backfill-test-"));
+  });
+
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("writes today's date to ready issues missing a date", () => {
+    const filePath = join(tmpDir, "issue-1.md");
+    writeFileSync(filePath, "---\nissue: 1\nstatus: ready\n---\n\n# Hello\n");
+
+    const issues = [makeIssue({ status: "ready", date: undefined, filePath })];
+    const fixed = backfillDates(issues);
+
+    const today = new Date().toISOString().slice(0, 10);
+    expect(fixed).toHaveLength(1);
+    expect(fixed[0].date).toBe(today);
+    expect(issues[0].date).toBe(today);
+
+    const updated = readFileSync(filePath, "utf8");
+    expect(updated).toContain(`date: '${today}'`);
+  });
+
+  it("skips draft issues", () => {
+    const filePath = join(tmpDir, "issue-2.md");
+    writeFileSync(filePath, "---\nissue: 2\nstatus: draft\n---\n\n# Draft\n");
+
+    const issues = [makeIssue({ status: "draft", date: undefined, filePath })];
+    const fixed = backfillDates(issues);
+
+    expect(fixed).toHaveLength(0);
+  });
+
+  it("skips ready issues that already have a date", () => {
+    const issues = [makeIssue({ status: "ready", date: "2026-01-01" })];
+    const fixed = backfillDates(issues);
+
+    expect(fixed).toHaveLength(0);
   });
 });

@@ -3,7 +3,7 @@ import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
-import { validateIssues } from "../pipeline/validation.js";
+import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig } from "../types.js";
 
@@ -37,6 +37,10 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
   const config = await loadConfig(configDir);
   const allIssues = await scanIssuesDir(config.issues_dir);
+
+  for (const b of backfillDates(allIssues)) {
+    console.log(`Added date ${b.date} to Issue ${b.issue} (${b.filePath})`);
+  }
 
   validateIssues(allIssues);
 

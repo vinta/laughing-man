@@ -1,4 +1,30 @@
+import { readFileSync, writeFileSync } from "node:fs";
+import matter from "@11ty/gray-matter";
 import type { IssueData } from "../types.js";
+
+interface BackfillResult {
+  issue: number;
+  filePath: string;
+  date: string;
+}
+
+export function backfillDates(issues: IssueData[]): BackfillResult[] {
+  const today = new Date().toISOString().slice(0, 10);
+  const fixed: BackfillResult[] = [];
+
+  for (const issue of issues) {
+    if (issue.status === "ready" && !issue.date) {
+      const raw = readFileSync(issue.filePath, "utf8");
+      const parsed = matter(raw);
+      parsed.data.date = today;
+      writeFileSync(issue.filePath, matter.stringify(parsed.content, parsed.data));
+      issue.date = today;
+      fixed.push({ issue: issue.issue, filePath: issue.filePath, date: today });
+    }
+  }
+
+  return fixed;
+}
 
 export function validateIssues(issues: IssueData[]): void {
   const errors: string[] = [];
