@@ -1,10 +1,10 @@
 # laughing-man
 
+[![npm Version](https://img.shields.io/npm/v/@sadcoderlabs/laughing-man?style=for-the-badge)](https://www.npmjs.com/package/@sadcoderlabs/laughing-man)
+
 Turn your Markdown into a newsletter.
 
 You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VSCode, etc.). The `laughing-man` CLI builds them into a browsable archive website and send-ready email newsletter. Deploy the site to Cloudflare Pages, send issues to subscribers via Resend. Fully self-hosted and free (within Resend and Cloudflare free tiers). No CMS, no database, no code — just you and your Markdown files.
-
-> Named after the Laughing Man from Kenji Kamiyama's _Ghost in the Shell: Stand Alone Complex_ — an elite hacker who broadcasts information by hijacking digital perceptions across the network.
 
 ## Installation
 
@@ -22,7 +22,7 @@ npx @sadcoderlabs/laughing-man --help
 
 ## Usage
 
-If you're the type who doesn't read the manual:
+If you're the type who skips the manual, just copy this prompt to your agent:
 
 ```prompt
 How do I use this tool? Read https://raw.githubusercontent.com/sadcoderlabs/laughing-man/main/skills/laughing-man/SKILL.md
@@ -39,13 +39,9 @@ laughing-man init
 
 ### Preview
 
-Preview your newsletter website (and email template) with the local server:
+Preview your newsletter website (and the email template) with the local server:
 
 ```bash
-newsletter/
-  your-first-newsletter-issue.md
-  laughing-man.yaml
-
 laughing-man preview
 ```
 
@@ -75,8 +71,11 @@ env:
 - Get your Cloudflare API token from [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens)
   - Permissions:
     - `Account | Cloudflare Pages | Edit`
-    - `Zone | DNS | Edit` for the specific custom domain zone when `web_hosting.domain` is set
-  - Scope the token to the specific account and, for DNS, the specific zone. Avoid `All zones` unless you intentionally want one token to manage DNS across every zone in the account.
+    - `Zone | DNS | Edit`
+  - Account Resources
+    - `Include | your account name`
+  - Zone Resources:
+    - `Include | Specific zone | example.com`
 - Get your Resend API key from [resend.com/api-keys](https://resend.com/api-keys)
   - Permission: **Full access** (required because the subscribe function creates contacts, not just sends email)
 
@@ -85,8 +84,8 @@ env:
 Set up Cloudflare Pages (project + custom domain + DNS) and deploy:
 
 ```bash
-laughing-man setup web          # Create Cloudflare Pages project + custom domain + DNS
-laughing-man deploy             # Deploy to Cloudflare Pages
+laughing-man setup web                 # Create Cloudflare Pages project + custom domain + DNS
+laughing-man deploy                    # Deploy to Cloudflare Pages
 ```
 
 Set up Resend and send an issue:
