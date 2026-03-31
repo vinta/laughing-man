@@ -8,10 +8,10 @@
   --line: rgb(from var(--accent) r g b / 0.18);
   --success: #1a7a3a;
   --danger: #b83030;
+  --on-accent: var(--bg-surface);
   --content-width: 75rem;
   --reading-width: 64rem;
   --header-height: 3.5rem;
-  --on-accent: var(--bg-surface);
   --code-bg: #1e2d3d;
   --code-text: #e0e6ed;
   --code-inline-bg: rgba(0, 0, 0, 0.05);
@@ -389,7 +389,7 @@ strong {
 .feed-empty {
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-faint);
   text-align: center;
   padding: 2rem 0;
 }
@@ -464,9 +464,6 @@ strong {
   position: absolute;
   inset-inline-start: 50%;
   pointer-events: none;
-}
-
-.not-found-hero::after {
   inset-block-start: clamp(3rem, 12vw, 6rem);
   inline-size: min(88vw, 50rem);
   block-size: 1px;
@@ -476,8 +473,7 @@ strong {
   animation: scan-sweep 7s linear infinite;
 }
 
-.not-found-kicker,
-.not-found-trace {
+.not-found-kicker {
   position: relative;
   z-index: 1;
   font-family: var(--font-mono);
@@ -937,7 +933,7 @@ del {
     justify-content: center;
     gap: 0.9rem;
     padding-block: 0.2rem 0;
-    border-block-start: 1px solid color-mix(in srgb, var(--line) 88%, white);
+    border-block-start: 1px solid color-mix(in srgb, var(--line) 88%, var(--bg));
   }
 
   .site-nav a {
@@ -973,7 +969,6 @@ del {
   .issue-body {
     font-size: 1rem;
   }
-
 
   .issue-emblem {
     inline-size: 5.5rem;
