@@ -24,7 +24,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 1,
-      rawContent: "",
       content: "<p>Hello world</p>",
       config: testConfig,
     });
@@ -37,7 +36,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 1,
-      rawContent: "",
       content: "<p>Hello world</p>",
       config: testConfig,
     });
@@ -50,7 +48,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 42,
-      rawContent: "",
       content: "<p>Hello world</p>",
       config: testConfig,
     });
@@ -62,7 +59,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 42,
-      rawContent: "",
       content: "<p>Hello world</p>",
       config: testConfig,
     });
@@ -75,7 +71,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 1,
-      rawContent: "",
       content: "<h2>Section</h2><p>Some content here.</p>",
       config: testConfig,
     });
@@ -89,8 +84,7 @@ describe("EmailPage", () => {
       EmailPage({
         title: "My First Issue",
         issue: 1,
-        rawContent: "",
-      content: '<p>Hello</p><mj-include path="/etc/hosts" type="css" />',
+        content: '<p>Hello</p><mj-include path="/etc/hosts" type="css" />',
         config: testConfig,
       })
     ).toThrow("Email content cannot contain <mj-include>");
@@ -100,7 +94,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 1,
-      rawContent: "",
       content: "<p>Hello</p>",
       config: testConfig,
     });
@@ -112,7 +105,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 1,
-      rawContent: "",
       content: "<p>Hello</p>",
       config: testConfig,
     });
@@ -124,7 +116,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 1,
-      rawContent: "",
       content: "<p>Hello</p>",
       config: testConfig,
     });
@@ -137,7 +128,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 1,
-      rawContent: "",
       content: "<p>Hello</p>",
       config: testConfig,
     });
@@ -150,7 +140,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "My First Issue",
       issue: 1,
-      rawContent: "",
       content: "<p>Hello</p>",
       config: testConfig,
     });
@@ -169,7 +158,6 @@ describe("EmailPage", () => {
     const html = EmailPage({
       title: "Test",
       issue: 1,
-      rawContent: "",
       content: "<p>Hello</p>",
       config: evilConfig,
     });

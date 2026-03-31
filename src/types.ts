@@ -43,7 +43,6 @@ export interface IssueProps {
   title: string;
   issue: number;
   date?: string;      // YYYY-MM-DD, present for "ready" issues
-  rawContent: string;  // Markdown body (frontmatter stripped, for description extraction)
   content: string;    // Rendered HTML (image src already rewritten)
   config: SiteConfig;
 }

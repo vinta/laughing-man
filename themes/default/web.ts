@@ -6,7 +6,11 @@ import { siteHeader, siteFooter } from "./layout.js";
 import { ogMetaTags, plainTextExcerpt } from "./meta.js";
 import { subscribeScript } from "./subscribe.js";
 
-export function WebPage({ title, issue, date, rawContent, content, config }: IssueProps): string {
+interface WebPageProps extends IssueProps {
+  rawContent: string;
+}
+
+export function WebPage({ title, issue, date, rawContent, content, config }: WebPageProps): string {
   const description = plainTextExcerpt(rawContent);
   const canonicalUrl = `${config.url}/issues/${issue}/`;
 
