@@ -29,6 +29,17 @@ env:
   RESEND_API_KEY: "re_xxxxx" # or set RESEND_API_KEY env var
 `;
 
+const FIRST_ISSUE_CONFIG_TEMPLATE = `
+---
+status: draft
+issue: 1
+---
+
+# Your Issue Title
+
+Hello World.
+`;
+
 export async function runInit(targetDir: string): Promise<void> {
   const configPath = join(targetDir, "laughing-man.yaml");
 
@@ -40,6 +51,12 @@ export async function runInit(targetDir: string): Promise<void> {
 
   writeFileSync(configPath, CONFIG_TEMPLATE.trimStart(), "utf8");
   console.log(`Created laughing-man.yaml`);
+
+  const firstIssuePath = join(targetDir, "your-first-newsletter-issue.md");
+  if (!existsSync(firstIssuePath)) {
+    writeFileSync(firstIssuePath, FIRST_ISSUE_CONFIG_TEMPLATE.trimStart(), "utf8");
+    console.log(`Created your-first-newsletter-issue.md`);
+  }
 
   const gitignorePath = join(targetDir, ".gitignore");
   const existing = existsSync(gitignorePath)
