@@ -61,28 +61,19 @@ export async function handleSubscribe(
   body: SubscribeBody | null,
   env: Env
 ): Promise<Response> {
-  console.log("[subscribe] request received", { email: body?.email });
-
   if (!body || !body.email || typeof body.email !== "string") {
-    console.error("[subscribe] invalid body");
     return Response.json({ error: "A valid email is required." }, { status: 400 });
   }
 
   const email = body.email.trim().toLowerCase();
   if (!EMAIL_RE.test(email)) {
-    console.error("[subscribe] invalid email format", { email });
     return Response.json({ error: "A valid email is required." }, { status: 400 });
   }
-
-  console.log("[subscribe] calling Resend API", {
-    hasApiKey: !!env.RESEND_API_KEY,
-  });
 
   try {
     const existing = await getContactByEmail(email, env.RESEND_API_KEY);
 
     if (existing && existing.unsubscribed === false) {
-      console.log("[subscribe] already subscribed", { email, contactId: existing.id });
       return successResponse("already_subscribed");
     }
 
@@ -100,19 +91,13 @@ export async function handleSubscribe(
       );
 
       if (!res.ok) {
-        const resBody = await res.text();
-        console.error("[subscribe] failed to re-subscribe contact", {
-          status: res.status,
-          body: resBody,
-          email,
-        });
+        await res.text();
         return Response.json(
           { error: "Failed to subscribe. Please try again." },
           { status: 500 }
         );
       }
 
-      console.log("[subscribe] re-subscribed", { email, contactId: existing.id });
       return successResponse("resubscribed");
     }
 
@@ -136,17 +121,14 @@ export async function handleSubscribe(
 
     if (!res.ok) {
       const resBody = await res.text();
-      console.error("[subscribe] Resend API error", { status: res.status, body: resBody });
       return Response.json(
         { error: "Failed to subscribe. Please try again." },
         { status: 500 }
       );
     }
 
-    console.log("[subscribe] success", { email });
     return successResponse("subscribed");
   } catch (err) {
-    console.error("[subscribe] unexpected error", err);
     return Response.json(
       { error: "Failed to subscribe. Please try again." },
       { status: 500 }
@@ -160,7 +142,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const body = (await context.request.json()) as SubscribeBody;
     return await handleSubscribe(body, context.env);
   } catch (err) {
-    console.error("[subscribe] unexpected error", err);
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
 };
