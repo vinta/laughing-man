@@ -219,8 +219,8 @@ strong {
 .subscribe-form {
   display: flex;
   gap: 0.5rem;
-  max-inline-size: 24rem;
-  inline-size: 100%;
+  inline-size: 24rem;
+  max-inline-size: 100%;
   transition: box-shadow 0.24s ease, transform 0.24s ease;
 }
 
