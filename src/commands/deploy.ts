@@ -40,5 +40,5 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
     );
   }
 
-  console.log("Deploy complete.");
+  console.log(`Deploy complete: ${config.url}`);
 }
