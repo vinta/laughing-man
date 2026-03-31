@@ -65,7 +65,16 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
   }
 
   function shouldIgnore(filename: string | null) {
-    if (!filename) return false;
+    if (!filename) {
+      // macOS may report null for non-ASCII filenames. Rebuild unless the
+      // output dir was recently touched (which means a build just ran and
+      // these events are from output writes, not user edits).
+      try {
+        const outputMtime = statSync(join(configDir, "output")).mtimeMs;
+        if (Date.now() - outputMtime < 2000) return true;
+      } catch {}
+      return false;
+    }
     const parts = filename.split(/[/\\]/);
     return parts.includes("output") || parts.includes("node_modules") || parts.includes(".git");
   }
