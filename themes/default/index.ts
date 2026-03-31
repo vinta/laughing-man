@@ -13,7 +13,11 @@ interface IndexProps {
   config: SiteConfig;
 }
 
-export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps): string {
+export function IndexPage({
+  issues,
+  config,
+  draftIssueNumbers = [],
+}: IndexProps): string {
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
 
   const feedItems = sorted
@@ -24,7 +28,7 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
         <span class="feed-marker">&gt;</span>
         <span class="feed-issue">${String(issue.issue).padStart(2, "0")}</span>
         <span class="feed-title">${escapeHtml(issue.title)}</span>
-        <span class="feed-meta">${issue.status === "draft" ? "(draft)" : issue.date ?? ""}</span>
+        <span class="feed-meta">${issue.status === "draft" ? "(draft)" : (issue.date ?? "")}</span>
       </a>
     </li>`,
     )
@@ -46,7 +50,9 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
 
   const allItems = teaserItems + feedItems;
 
-  const description = config.description ?? "New issues arrive by email. The archive stays open.";
+  const description =
+    config.description ??
+    "I thought what I'd do was I'd pretend I was one of those deaf";
 
   return `<!DOCTYPE html>
 <html lang="en">
