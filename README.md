@@ -8,16 +8,16 @@ You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VS
 
 ## Installation
 
-Requires [Bun](https://bun.sh/) and a domain name.
+Requires Node.js 22+ and a domain name.
 
 ```bash
-bun add -g @sadcoder/laughing-man
+npm install -g @sadcoderlabs/laughing-man
 ```
 
 Or run without installing:
 
 ```bash
-bunx @sadcoder/laughing-man --help
+npx @sadcoderlabs/laughing-man --help
 ```
 
 ## Usage
@@ -48,6 +48,8 @@ newsletter/
 laughing-man preview
 ```
 
+`preview` writes local artifacts to `preview/`. Production `build` and `deploy` continue to use `output/`.
+
 Set up Cloudflare Pages (project + custom domain + DNS) and deploy:
 
 ```bash
@@ -68,6 +70,8 @@ Set up Resend and send an issue:
 laughing-man setup newsletter          # Verify Resend API key + sender domain + DNS
 laughing-man send <issue-number>       # Send an issue via Resend Broadcast
 ```
+
+`send` runs a fresh production build before it sends, so draft issues stay excluded.
 
 ## Configurations
 

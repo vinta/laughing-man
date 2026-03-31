@@ -53,6 +53,14 @@ describe("runInit", () => {
     expect(content).toContain("issue: 1");
   });
 
+  it("adds output and preview folders to .gitignore", async () => {
+    await runInit(tmpDir);
+
+    const content = readFileSync(join(tmpDir, ".gitignore"), "utf8");
+    expect(content).toContain("output/");
+    expect(content).toContain("preview/");
+  });
+
   it("does not overwrite existing first issue file", async () => {
     writeFileSync(join(tmpDir, "your-first-newsletter-issue.md"), "my issue");
 

@@ -1,14 +1,18 @@
 import { mkdirSync, writeFileSync, rmSync, cpSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig } from "../types.js";
 
+const themesDir = resolve(import.meta.dirname, "../../themes/default");
+
 interface BuildOptions {
   configDir: string;
   includeDrafts: boolean;
+  outputDirName?: string;
 }
 
 interface BuildResult {
@@ -16,16 +20,19 @@ interface BuildResult {
   outputDir: string;
 }
 
-const themesDir = resolve(import.meta.dirname, "../../themes/default");
-
 export async function runBuild(options: BuildOptions): Promise<BuildResult> {
-  const { configDir, includeDrafts } = options;
+  const { configDir, includeDrafts, outputDirName = "output" } = options;
 
+  // Dynamic imports with cache-busting so preview rebuilds pick up theme changes
+  const ext = existsSync(join(themesDir, "email.ts")) ? "ts" : "js";
   const bust = `?v=${Date.now()}`;
-  const [{ EmailPage }, { WebPage }, { IndexPage }] = await Promise.all([
-    import(`${themesDir}/email.ts${bust}`),
-    import(`${themesDir}/web.ts${bust}`),
-    import(`${themesDir}/index.ts${bust}`),
+  const themeUrl = (name: string) =>
+    `${pathToFileURL(join(themesDir, `${name}.${ext}`))}${bust}`;
+  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }] = await Promise.all([
+    import(themeUrl("email")),
+    import(themeUrl("web")),
+    import(themeUrl("index")),
+    import(themeUrl("not-found")),
   ]);
 
   const config = await loadConfig(configDir);
@@ -43,7 +50,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
   const sorted = [...issues].sort((a, b) => a.issue - b.issue);
 
-  const outputDir = join(configDir, "output");
+  const outputDir = join(configDir, outputDirName);
   const websiteDir = join(outputDir, "website");
   const emailDir = join(outputDir, "email");
 
@@ -84,14 +91,17 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config });
   writeFileSync(join(websiteDir, "index.html"), indexHtml, "utf8");
 
+  const notFoundHtml = NotFoundPage({ config });
+  writeFileSync(join(websiteDir, "404.html"), notFoundHtml, "utf8");
+
   // Copy Pages Functions into output/ so wrangler can find them
   const functionsSource = resolve(import.meta.dirname, "../../functions");
   if (existsSync(functionsSource)) {
     cpSync(functionsSource, join(outputDir, "functions"), { recursive: true });
   }
 
-  const readyCount = sorted.length;
-  const draftCount = allIssues.length - issues.length;
+  const readyCount = allIssues.filter((i) => i.status === "ready").length;
+  const draftCount = allIssues.filter((i) => i.status === "draft").length;
   const parts = [];
   if (readyCount > 0) parts.push(`${readyCount} ready`);
   if (draftCount > 0) parts.push(`${draftCount} draft`);

@@ -18,8 +18,8 @@ laughing-man deploy            # Deploy to Cloudflare Pages via wrangler
 laughing-man send <N>          # Send issue N via Resend Broadcast
 ```
 
-Install from npm: `bun add -g @sadcoder/laughing-man`
-Or run without installing: `bunx @sadcoder/laughing-man <command>`
+Install from npm: `npm install -g @sadcoderlabs/laughing-man`
+Or run without installing: `npx @sadcoderlabs/laughing-man <command>`
 
 ## Tech Stack
 
@@ -36,8 +36,11 @@ Or run without installing: `bunx @sadcoder/laughing-man <command>`
 ```bash
 bun test                # Run tests
 bun run typecheck       # TypeScript check
+bun run build           # Compile TS + copy assets to dist/
 bun src/cli.ts --help   # Run CLI locally
 ```
+
+Always run `bun run build` after any code change to keep `dist/` in sync.
 
 ### Local CLI testing
 

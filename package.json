@@ -1,12 +1,36 @@
 {
-  "name": "@sadcoder/laughing-man",
+  "name": "@sadcoderlabs/laughing-man",
   "version": "0.1.0",
   "description": "Turn your Markdown into a newsletter",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/src/cli.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sadcoderlabs/laughing-man.git"
+  },
+  "keywords": [
+    "newsletter",
+    "markdown",
+    "email",
+    "cli",
+    "cloudflare-pages",
+    "resend"
+  ],
   "bin": {
-    "laughing-man": "./src/cli.ts"
+    "laughing-man": "dist/src/cli.js"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.build.json && cp themes/default/*.css themes/default/*.svg dist/themes/default/ && mkdir -p dist/skills/laughing-man && cp skills/laughing-man/SKILL.md dist/skills/laughing-man/",
+    "prepublishOnly": "bun run build",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },
@@ -16,6 +40,7 @@
     "marked": "17.0.5",
     "mjml": "4.18.0",
     "resend": "6.9.4",
+    "yaml": "2.8.3",
     "zod": "4.3.6"
   },
   "devDependencies": {
@@ -24,5 +49,13 @@
     "@types/mjml": "4.7.4",
     "@types/node": "25.5.0",
     "typescript": "6.0.2"
+  },
+  "peerDependencies": {
+    "wrangler": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "wrangler": {
+      "optional": true
+    }
   }
 }

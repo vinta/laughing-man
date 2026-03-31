@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { runInit } from "./commands/init.js";
 import { runBuild } from "./commands/build.js";
 import { runPreview } from "./commands/preview.js";
@@ -56,7 +56,7 @@ Generate a laughing-man.yaml config file in the current directory.
           showHelp(`Usage: laughing-man build
 
 Validate all issues and generate site + email HTML.
-Drafts are excluded from the output.
+Drafts are excluded from output/.
 `);
         }
         await runBuild({ configDir, includeDrafts: false });
@@ -68,6 +68,7 @@ Drafts are excluded from the output.
           showHelp(`Usage: laughing-man preview [options]
 
 Build (including drafts) and start a local preview server.
+Writes preview artifacts to preview/.
 
 Options:
   --production    Build as production (exclude drafts, show teasers)
@@ -154,6 +155,7 @@ All stamped issues are set to 'draft' status.
           showHelp(`Usage: laughing-man send <issue-number> [options]
 
 Send an issue via Resend Broadcast.
+Runs a production build first.
 
 Options:
   --yes                Skip confirmation prompt (for CI)
