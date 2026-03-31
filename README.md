@@ -8,16 +8,16 @@ You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VS
 
 ## Installation
 
-Requires [Bun](https://bun.sh/) and a domain name.
+Requires Node.js 22+ and a domain name.
 
 ```bash
-bun add -g @sadcoderlabs/laughing-man
+npm install -g @sadcoderlabs/laughing-man
 ```
 
 Or run without installing:
 
 ```bash
-bunx @sadcoderlabs/laughing-man --help
+npx @sadcoderlabs/laughing-man --help
 ```
 
 ## Usage
