@@ -903,16 +903,16 @@ del {
     font-size: 0.92rem;
     line-height: 1.4;
     letter-spacing: 0.08em;
-    padding-block: 0.35rem 0.7rem;
+    padding-block: 0.55rem 0.95rem;
   }
 
   .site-nav {
     inline-size: 100%;
-    min-block-size: 3rem;
+    min-block-size: 2.4rem;
     align-items: center;
     justify-content: center;
     gap: 0.9rem;
-    padding-block: 0;
+    padding-block: 0.2rem 0;
     border-block-start: 1px solid color-mix(in srgb, var(--line) 88%, white);
   }
 
