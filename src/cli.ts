@@ -22,7 +22,7 @@ async function main(): Promise<void> {
   const command = args[0];
 
   if (!command || command === "--help" || command === "-h") {
-    showHelp(`laughing-man -- Turn your Markdown into a newsletter.
+    showHelp(`laughing-man -- Turn your Markdown into a self-hosted newsletter.
 
 Commands:
   init              Generate laughing-man.yaml in the current directory

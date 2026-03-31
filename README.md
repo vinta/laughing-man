@@ -2,7 +2,7 @@
 
 [![npm Version](https://img.shields.io/npm/v/@sadcoderlabs/laughing-man?style=for-the-badge)](https://www.npmjs.com/package/@sadcoderlabs/laughing-man)
 
-Turn your Markdown into a newsletter.
+Turn your Markdown into a self-hosted newsletter.
 
 You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VSCode, etc.). The `laughing-man` CLI builds them into a browsable archive website and send-ready email newsletter. Deploy the site to Cloudflare Pages, send issues to subscribers via Resend. Fully self-hosted and free (within Resend and Cloudflare free tiers). No CMS, no database, no code — just you and your Markdown files.
 
