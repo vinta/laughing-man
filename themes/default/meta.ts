@@ -36,6 +36,9 @@ interface OgMeta {
 }
 
 export function ogMetaTags({ title, description, url, siteName, type, publishedTime }: OgMeta): string {
+  const siteOrigin = new URL(url).origin;
+  const imageUrl = `${siteOrigin}/laughing-man.png`;
+
   const tags = [
     `<meta name="description" content="${escapeHtml(description)}">`,
     `<meta property="og:title" content="${escapeHtml(title)}">`,
@@ -43,13 +46,15 @@ export function ogMetaTags({ title, description, url, siteName, type, publishedT
     `<meta property="og:url" content="${escapeHtml(url)}">`,
     `<meta property="og:type" content="${type}">`,
     `<meta property="og:site_name" content="${escapeHtml(siteName)}">`,
+    `<meta property="og:image" content="${escapeHtml(imageUrl)}">`,
   ];
 
   if (type === "article" && publishedTime) {
     tags.push(`<meta property="article:published_time" content="${escapeHtml(publishedTime)}">`);
   }
 
-  tags.push(`<meta name="twitter:card" content="summary">`);
+  tags.push(`<meta name="twitter:card" content="summary_large_image">`);
+  tags.push(`<meta name="twitter:image" content="${escapeHtml(imageUrl)}">`);
 
   return tags.join("\n  ");
 }

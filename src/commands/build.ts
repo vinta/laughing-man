@@ -100,6 +100,12 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const notFoundHtml = NotFoundPage({ config });
   writeFileSync(join(websiteDir, "404.html"), notFoundHtml, "utf8");
 
+  // Copy static assets (OG image) into website root
+  const ogImageSource = resolve(import.meta.dirname, "../../themes/default/laughing-man.png");
+  if (existsSync(ogImageSource)) {
+    cpSync(ogImageSource, join(websiteDir, "laughing-man.png"));
+  }
+
   // Copy Pages Functions into output/ so wrangler can find them
   const functionsSource = resolve(import.meta.dirname, "../../functions");
   if (existsSync(functionsSource)) {
