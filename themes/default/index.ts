@@ -85,7 +85,7 @@ export function IndexPage({
           <input id="email" type="email" name="email" placeholder="your@email.com" required>
           <button type="submit">Subscribe</button>
         </form>
-        <p class="subscribe-message" id="subscribe-message" hidden></p>
+        <p class="subscribe-message" id="subscribe-message" role="status" aria-live="polite" hidden></p>
       </div>
     </section>
     <section id="archive" class="feed">

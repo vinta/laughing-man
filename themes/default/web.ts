@@ -55,7 +55,7 @@ export function WebPage({ title, issue, date, rawContent, content, config }: Web
         <input id="issue-email" type="email" name="email" placeholder="your@email.com" required>
         <button type="submit">Subscribe</button>
       </form>
-      <p class="subscribe-message" id="issue-subscribe-message" hidden></p>
+      <p class="subscribe-message" id="issue-subscribe-message" role="status" aria-live="polite" hidden></p>
     </section>
     <nav class="issue-back">
       <a href="/#archive">&lt; Back to Archives</a>
