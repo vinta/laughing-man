@@ -90,7 +90,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cpSync(functionsSource, join(outputDir, "functions"), { recursive: true });
   }
 
-  console.log(`Build complete: ${sorted.length} issue(s) written to ${outputDir}`);
+  const draftCount = allIssues.length - issues.length;
+  const draftNote = draftCount > 0 ? ` (${draftCount} draft(s) skipped)` : "";
+  console.log(`Build complete: ${sorted.length} issue(s) written to ${outputDir}${draftNote}`);
 
   return { config, outputDir };
 }
