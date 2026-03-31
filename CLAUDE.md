@@ -4,8 +4,6 @@
 
 laughing-man is a CLI tool that turns a folder of Markdown files into a newsletter: a static archive site on Cloudflare Pages and email delivery via Resend Broadcasts. Built with Bun + TypeScript.
 
-- **Spec:** `docs/superpowers/specs/2026-03-28-laughing-man-design.md`
-- **Implementation plan:** `docs/superpowers/plans/2026-03-28-laughing-man-v1.md`
 
 ## Commands
 
