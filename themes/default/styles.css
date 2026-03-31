@@ -11,6 +11,9 @@
   --content-width: 75rem;
   --reading-width: 64rem;
   --header-height: 3.5rem;
+  --code-bg: #1e2d3d;
+  --code-text: #e0e6ed;
+  --code-inline-bg: rgba(0, 0, 0, 0.05);
   --font-sans: "Space Grotesk", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
 }
@@ -780,8 +783,8 @@ pre {
   overflow-x: auto;
   padding: 1.2rem;
   border-radius: 0.5rem;
-  background: #1e2d3d;
-  color: #e0e6ed;
+  background: var(--code-bg);
+  color: var(--code-text);
   border: 1px solid var(--line);
 }
 
@@ -795,7 +798,7 @@ li code {
   padding: 0.12rem 0.38rem;
   border-radius: 0.25rem;
   color: var(--text);
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--code-inline-bg);
 }
 
 pre code {
@@ -1037,6 +1040,19 @@ del {
     --accent: #2299bb;
     --success: #2ebd5c;
     --danger: #e04848;
+    --code-bg: #0a1520;
+    --code-text: #d8dee6;
+    --code-inline-bg: rgba(255, 255, 255, 0.08);
+  }
+
+  .issue-reading-surface {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 16px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  body::before {
+    opacity: 0.35;
   }
 }
 
