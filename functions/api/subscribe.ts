@@ -120,7 +120,7 @@ export async function handleSubscribe(
     );
 
     if (!res.ok) {
-      const resBody = await res.text();
+      await res.text();
       return Response.json(
         { error: "Failed to subscribe. Please try again." },
         { status: 500 }
@@ -129,6 +129,7 @@ export async function handleSubscribe(
 
     return successResponse("subscribed");
   } catch (err) {
+    console.error(JSON.stringify({ message: "subscribe_error", error: err instanceof Error ? err.message : String(err) }));
     return Response.json(
       { error: "Failed to subscribe. Please try again." },
       { status: 500 }
