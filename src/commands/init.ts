@@ -6,7 +6,7 @@ import {
   mkdirSync,
   copyFileSync,
 } from "node:fs";
-import { join, dirname, resolve } from "node:path";
+import { join, resolve } from "node:path";
 
 const CONFIG_TEMPLATE = `
 name: Your Newsletter Name
