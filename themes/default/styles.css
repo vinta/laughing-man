@@ -583,7 +583,7 @@ strong {
 
 .footer-credit {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
@@ -1027,7 +1027,6 @@ del {
   }
 
   .footer-credit {
-    font-size: 0.68rem;
     line-height: 1.5;
   }
 }
