@@ -65,7 +65,7 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
   }
 
   function shouldIgnore(filename: string | null) {
-    if (!filename) return true;
+    if (!filename) return false;
     const parts = filename.split(/[/\\]/);
     return parts.includes("output") || parts.includes("node_modules") || parts.includes(".git");
   }
