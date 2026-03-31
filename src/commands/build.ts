@@ -1,13 +1,13 @@
 import { mkdirSync, writeFileSync, rmSync, cpSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig } from "../types.js";
-import { EmailPage } from "../../themes/default/email.js";
-import { WebPage } from "../../themes/default/web.js";
-import { IndexPage } from "../../themes/default/index.js";
+
+const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
 interface BuildOptions {
   configDir: string;
@@ -21,6 +21,17 @@ interface BuildResult {
 
 export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const { configDir, includeDrafts } = options;
+
+  // Dynamic imports with cache-busting so preview rebuilds pick up theme changes
+  const ext = existsSync(join(themesDir, "email.ts")) ? "ts" : "js";
+  const bust = `?v=${Date.now()}`;
+  const themeUrl = (name: string) =>
+    `${pathToFileURL(join(themesDir, `${name}.${ext}`))}${bust}`;
+  const [{ EmailPage }, { WebPage }, { IndexPage }] = await Promise.all([
+    import(themeUrl("email")),
+    import(themeUrl("web")),
+    import(themeUrl("index")),
+  ]);
 
   const config = await loadConfig(configDir);
   const allIssues = await scanIssuesDir(config.issues_dir);
