@@ -114,6 +114,11 @@ a {
   transition: color 0.2s ease;
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 p {
   margin: 0 0 1rem;
 }
