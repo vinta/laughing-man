@@ -41,7 +41,7 @@ bun src/cli.ts --help   # Run CLI locally
 
 Always run `bun run build` after any code change to keep `dist/` in sync.
 
-### Local CLI testing
+### Local CLI Testing
 
 Run `bun link` from the project root to register the package globally. This symlinks to source, so code changes take effect immediately without re-running.
 
@@ -52,7 +52,7 @@ laughing-man --help            # Works from any directory
 
 Re-run `bun link` after Bun upgrades or if `laughing-man` stops resolving.
 
-### Releasing a new version
+### Releasing a New Version
 
 1. Bump the version in `package.json`
 2. Commit the version bump and push to `main`
