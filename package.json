@@ -15,7 +15,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sadcoderlabs/laughing-man.git"
+    "url": "git+https://github.com/sadcoderlabs/laughing-man.git"
   },
   "keywords": [
     "newsletter",
@@ -26,7 +26,7 @@
     "resend"
   ],
   "bin": {
-    "laughing-man": "./dist/src/cli.js"
+    "laughing-man": "dist/src/cli.js"
   },
   "scripts": {
     "build": "tsc --project tsconfig.build.json && cp themes/default/*.css themes/default/*.svg dist/themes/default/ && mkdir -p dist/skills/laughing-man && cp skills/laughing-man/SKILL.md dist/skills/laughing-man/",

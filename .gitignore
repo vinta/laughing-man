@@ -142,6 +142,7 @@ vite.config.ts.timestamp-*
 .worktrees/
 
 # Build output
+package/
 output/
 
 # Local Claude config
