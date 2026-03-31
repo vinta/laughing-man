@@ -40,7 +40,7 @@ interface StampResult {
 
 interface StampOutput {
   stamped: StampResult[];
-  skipped: Array<{ filename: string }>;
+  skipped: Array<{ filename: string; issue?: number }>;
 }
 
 function getCreationOrderTime(stat: Stats): Date {
@@ -69,7 +69,7 @@ export async function runStamp(issuesDir: string): Promise<StampOutput> {
     birthtime: Date;
     inferred: InferResult | null;
   }> = [];
-  const skipped: Array<{ filename: string }> = [];
+  const skipped: Array<{ filename: string; issue?: number }> = [];
 
   for (const filename of files) {
     const filePath = join(issuesDir, filename);
@@ -77,7 +77,7 @@ export async function runStamp(issuesDir: string): Promise<StampOutput> {
     const { data, content } = matter(raw);
 
     if (Object.keys(data).length > 0) {
-      skipped.push({ filename });
+      skipped.push({ filename, issue: typeof data.issue === "number" ? data.issue : undefined });
       continue;
     }
 
@@ -95,6 +95,14 @@ export async function runStamp(issuesDir: string): Promise<StampOutput> {
 
   // Resolve issue numbers: collect claimed numbers, handle duplicates
   const claimed = new Map<number, { filename: string; birthtime: Date }>();
+
+  // Seed with issue numbers from files that already have frontmatter
+  for (const skip of skipped) {
+    if (skip.issue !== undefined) {
+      claimed.set(skip.issue, { filename: skip.filename, birthtime: new Date(0) });
+    }
+  }
+
   const needsFallback: typeof toStamp = [];
 
   // First pass: collect all inferred numbers, detect duplicates
