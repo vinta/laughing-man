@@ -5,6 +5,7 @@ import { marked } from "marked";
 import { z } from "zod";
 import type { IssueData } from "../types.js";
 import { extractHeading } from "./heading.js";
+import { inferIssueNumber } from "../commands/stamp.js";
 
 const FrontmatterSchema = z.object({
   issue: z.number({
@@ -64,21 +65,41 @@ export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
     );
   }
 
-  // Parse all files once. If every file lacks frontmatter, suggest `stamp`
-  // instead of throwing cryptic per-file validation errors.
   const entries = files.map((f) => {
     const filePath = join(issuesDir, f);
     const { data, content } = matter(readFileSync(filePath, "utf8"));
-    return { filePath, data, content };
+    return { filePath, data, content, filename: f };
   });
 
-  const allBare = entries.every(({ data }) => Object.keys(data).length === 0);
-
-  if (allBare) {
-    throw new Error(
-      "No issues found. Run 'laughing-man stamp' to add frontmatter to your .md files."
-    );
+  // Collect issue numbers claimed by files with frontmatter
+  const claimed = new Set<number>();
+  for (const { data } of entries) {
+    if (Object.keys(data).length > 0 && typeof data.issue === "number") {
+      claimed.add(data.issue);
+    }
   }
 
-  return Promise.all(entries.map(({ filePath, data, content }) => parseIssue(filePath, data, content)));
+  // Auto-assign frontmatter for bare files
+  const resolved = entries.map(({ filePath, data, content, filename }) => {
+    if (Object.keys(data).length > 0) return { filePath, data, content };
+
+    const heading = extractHeading(content);
+    const inferred = inferIssueNumber(filename, heading);
+    let issue = inferred?.issue ?? null;
+
+    if (issue === null || claimed.has(issue)) {
+      let next = 1;
+      while (claimed.has(next)) next++;
+      issue = next;
+    }
+    claimed.add(issue);
+
+    return {
+      filePath,
+      data: { issue, status: "draft" as const },
+      content,
+    };
+  });
+
+  return Promise.all(resolved.map(({ filePath, data, content }) => parseIssue(filePath, data, content)));
 }
