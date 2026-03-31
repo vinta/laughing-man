@@ -36,8 +36,11 @@ Or run without installing: `bunx @sadcoder/laughing-man <command>`
 ```bash
 bun test                # Run tests
 bun run typecheck       # TypeScript check
+bun run build           # Compile TS + copy assets to dist/
 bun src/cli.ts --help   # Run CLI locally
 ```
+
+Always run `bun run build` after any code change to keep `dist/` in sync.
 
 ### Local CLI testing
 
