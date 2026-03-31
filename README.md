@@ -48,6 +48,8 @@ newsletter/
 laughing-man preview
 ```
 
+`preview` writes local artifacts to `preview/`. Production `build` and `deploy` continue to use `output/`.
+
 Set up Cloudflare Pages (project + custom domain + DNS) and deploy:
 
 ```bash

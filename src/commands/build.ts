@@ -12,6 +12,7 @@ const themesDir = resolve(import.meta.dirname, "../../themes/default");
 interface BuildOptions {
   configDir: string;
   includeDrafts: boolean;
+  outputDirName?: string;
 }
 
 interface BuildResult {
@@ -20,7 +21,7 @@ interface BuildResult {
 }
 
 export async function runBuild(options: BuildOptions): Promise<BuildResult> {
-  const { configDir, includeDrafts } = options;
+  const { configDir, includeDrafts, outputDirName = "output" } = options;
 
   // Dynamic imports with cache-busting so preview rebuilds pick up theme changes
   const ext = existsSync(join(themesDir, "email.ts")) ? "ts" : "js";
@@ -49,7 +50,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
   const sorted = [...issues].sort((a, b) => a.issue - b.issue);
 
-  const outputDir = join(configDir, "output");
+  const outputDir = join(configDir, outputDirName);
   const websiteDir = join(outputDir, "website");
   const emailDir = join(outputDir, "email");
 

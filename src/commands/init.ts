@@ -62,9 +62,12 @@ export async function runInit(targetDir: string): Promise<void> {
   const existing = existsSync(gitignorePath)
     ? readFileSync(gitignorePath, "utf8")
     : "";
-  if (!existing.split("\n").some((line) => line.trim() === "output/")) {
-    appendFileSync(gitignorePath, "\noutput/\n");
-    console.log(`Added output/ to .gitignore`);
+
+  for (const entry of ["output/", "preview/"]) {
+    if (!existing.split("\n").some((line) => line.trim() === entry)) {
+      appendFileSync(gitignorePath, `\n${entry}\n`);
+      console.log(`Added ${entry} to .gitignore`);
+    }
   }
 
   // Copy bundled skill file

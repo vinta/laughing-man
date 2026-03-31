@@ -27,10 +27,15 @@ const MIME_TYPES: Record<string, string> = {
 
 export async function runPreview(options: PreviewOptions): Promise<void> {
   const { configDir, includeDrafts } = options;
+  const previewOutputDir = resolve(configDir, "preview");
 
-  const { config } = await runBuild({ configDir, includeDrafts });
-  const websiteDir = resolve(configDir, "output", "website");
-  const emailDir = resolve(configDir, "output", "email");
+  const { config } = await runBuild({
+    configDir,
+    includeDrafts,
+    outputDirName: "preview",
+  });
+  const websiteDir = join(previewOutputDir, "website");
+  const emailDir = join(previewOutputDir, "email");
   const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
   const clients = new Set<{ write: (data: string) => void; end: () => void }>();
@@ -47,7 +52,11 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
       if (building) return;
       building = true;
       try {
-        await runBuild({ configDir, includeDrafts });
+        await runBuild({
+          configDir,
+          includeDrafts,
+          outputDirName: "preview",
+        });
         for (const client of clients) {
           try {
             client.write("data: reload\n\n");
@@ -67,16 +76,16 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
   function shouldIgnore(filename: string | null) {
     if (!filename) {
       // macOS may report null for non-ASCII filenames. Rebuild unless the
-      // output dir was recently touched (which means a build just ran and
-      // these events are from output writes, not user edits).
+      // preview dir was recently touched (which means a build just ran and
+      // these events are from preview writes, not user edits).
       try {
-        const outputMtime = statSync(join(configDir, "output")).mtimeMs;
-        if (Date.now() - outputMtime < 2000) return true;
+        const previewMtime = statSync(previewOutputDir).mtimeMs;
+        if (Date.now() - previewMtime < 2000) return true;
       } catch {}
       return false;
     }
     const parts = filename.split(/[/\\]/);
-    return parts.includes("output") || parts.includes("node_modules") || parts.includes(".git");
+    return parts.includes("output") || parts.includes("preview") || parts.includes("node_modules") || parts.includes(".git");
   }
 
   watch(config.issues_dir, { recursive: true }, (_event, filename) => {
