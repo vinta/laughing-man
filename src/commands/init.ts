@@ -29,7 +29,7 @@ env:
   RESEND_API_KEY: "re_xxxxx" # or set RESEND_API_KEY env var
 `;
 
-const FIRST_ISSUE_CONFIG_TEMPLATE = `
+const FIRST_ISSUE_TEMPLATE = `
 ---
 status: draft
 issue: 1
@@ -54,7 +54,7 @@ export async function runInit(targetDir: string): Promise<void> {
 
   const firstIssuePath = join(targetDir, "your-first-newsletter-issue.md");
   if (!existsSync(firstIssuePath)) {
-    writeFileSync(firstIssuePath, FIRST_ISSUE_CONFIG_TEMPLATE.trimStart(), "utf8");
+    writeFileSync(firstIssuePath, FIRST_ISSUE_TEMPLATE.trimStart(), "utf8");
     console.log(`Created your-first-newsletter-issue.md`);
   }
 
