@@ -71,7 +71,7 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
       </div>
       <h1>${escapeHtml(config.name)}</h1>
       <div class="hero-summary">
-        ${config.description ? marked.parse(config.description) : "<p>New issues arrive by email. The archive stays open.</p>"}
+        ${config.description ? marked.parse(config.description) : `<p>${escapeHtml(description)}</p>`}
       </div>
       <div id="subscribe">
         <form class="subscribe-form" id="subscribe-form">
