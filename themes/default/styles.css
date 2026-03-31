@@ -216,16 +216,17 @@ strong {
 
 /* ─── Subscribe form ─── */
 
+.hero > #subscribe {
+  align-self: stretch;
+}
+
 .subscribe-form {
   display: flex;
   gap: 0.5rem;
   inline-size: 24rem;
   max-inline-size: 100%;
+  margin-inline: auto;
   transition: box-shadow 0.24s ease, transform 0.24s ease;
-}
-
-.hero .subscribe-form {
-  max-inline-size: calc(100% - 2.5rem);
 }
 
 .subscribe-form.is-targeted {
