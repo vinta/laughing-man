@@ -1027,6 +1027,19 @@ del {
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111b26;
+    --bg-surface: #1a2a3a;
+    --text: #d8dee6;
+    --text-muted: #8a9baa;
+    --text-faint: #667788;
+    --accent: #2299bb;
+    --success: #2ebd5c;
+    --danger: #e04848;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
