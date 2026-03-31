@@ -637,7 +637,6 @@ strong {
   color: var(--text);
   letter-spacing: -0.02em;
   line-height: 1.15;
-  white-space: nowrap;
 }
 
 /* ─── Issue: Reading surface ─── */
@@ -974,9 +973,6 @@ del {
     font-size: 1rem;
   }
 
-  .issue-hero h1 {
-    white-space: normal;
-  }
 
   .issue-emblem {
     inline-size: 5.5rem;
