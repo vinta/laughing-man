@@ -436,7 +436,7 @@ strong {
 .footer-name {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   letter-spacing: 0.06em;
   color: var(--text-muted);
 }
