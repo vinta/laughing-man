@@ -106,6 +106,28 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cpSync(ogImageSource, join(websiteDir, "laughing-man.png"));
   }
 
+  // Only route /api/* through Pages Functions; serve everything else as
+  // static assets (free requests, lower latency, no CPU metering).
+  writeFileSync(
+    join(websiteDir, "_routes.json"),
+    JSON.stringify({ version: 1, include: ["/api/*"], exclude: [] }, null, 2) + "\n",
+    "utf8",
+  );
+
+  // Security headers for static assets. Functions set their own headers in
+  // the Response object, so these only apply to HTML/CSS/image requests.
+  writeFileSync(
+    join(websiteDir, "_headers"),
+    [
+      "/*",
+      "  X-Content-Type-Options: nosniff",
+      "  Referrer-Policy: strict-origin-when-cross-origin",
+      "  X-Frame-Options: DENY",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+
   // Copy Pages Functions into output/ so wrangler can find them
   const functionsSource = resolve(import.meta.dirname, "../../functions");
   if (existsSync(functionsSource)) {

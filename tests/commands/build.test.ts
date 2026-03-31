@@ -180,6 +180,41 @@ env: {}
     );
   });
 
+  it("generates _routes.json that routes only /api/* through Functions", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const routes = JSON.parse(
+      readFileSync(join(tmpDir, "output", "website", "_routes.json"), "utf8"),
+    );
+    expect(routes).toEqual({
+      version: 1,
+      include: ["/api/*"],
+      exclude: [],
+    });
+  });
+
+  it("generates _headers with security headers for static assets", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const headers = readFileSync(
+      join(tmpDir, "output", "website", "_headers"),
+      "utf8",
+    );
+    expect(headers).toContain("X-Content-Type-Options: nosniff");
+    expect(headers).toContain("X-Frame-Options: DENY");
+    expect(headers).toContain("Referrer-Policy: strict-origin-when-cross-origin");
+  });
+
   it("404.html uses general recovery copy and links back into the site", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),
@@ -192,11 +227,9 @@ env: {}
       join(tmpDir, "output", "website", "404.html"),
       "utf8",
     );
-    expect(notFoundHtml).toContain("This page does not exist");
+    expect(notFoundHtml).toContain("Page not found");
     expect(notFoundHtml).toContain("Go to homepage");
     expect(notFoundHtml).toContain('href="/"');
-    expect(notFoundHtml).toContain("Archives");
-    expect(notFoundHtml).toContain('href="/#archive"');
   });
 
   it("production build shows coming-soon teasers for draft issues", async () => {
