@@ -1,6 +1,6 @@
 {
   "name": "@sadcoderlabs/laughing-man",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Turn your Markdown into a self-hosted newsletter",
   "type": "module",
   "files": [
