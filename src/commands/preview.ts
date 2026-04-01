@@ -19,12 +19,21 @@ const MIME_TYPES: Record<string, string> = {
   ".jpeg": "image/jpeg",
   ".gif": "image/gif",
   ".svg": "image/svg+xml",
-  ".xml": "application/rss+xml; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
   ".ico": "image/x-icon",
   ".webp": "image/webp",
   ".woff": "font/woff",
   ".woff2": "font/woff2",
 };
+
+export function getPreviewContentType(pathname: string, filePath: string): string {
+  if (pathname === "/feed.xml") {
+    return "application/rss+xml; charset=utf-8";
+  }
+
+  const ext = extname(filePath);
+  return MIME_TYPES[ext] ?? "application/octet-stream";
+}
 
 export async function runPreview(options: PreviewOptions): Promise<void> {
   const { configDir, includeDrafts } = options;
@@ -224,8 +233,7 @@ ${reloadScript}
         return;
       }
 
-      const ext = extname(filePath);
-      const contentType = MIME_TYPES[ext] ?? "application/octet-stream";
+      const contentType = getPreviewContentType(url.pathname, filePath);
       const stat = statSync(filePath);
       res.writeHead(200, { "Content-Type": contentType, "Content-Length": stat.size });
       createReadStream(filePath).pipe(res);

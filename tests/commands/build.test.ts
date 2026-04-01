@@ -423,6 +423,45 @@ env: {}
     );
   });
 
+  it("generates feed.xml with absolute published asset URLs and date-based ordering", async () => {
+    mkdirSync(join(tmpDir, "attachments"), { recursive: true });
+    writeFileSync(join(tmpDir, "attachments", "cover.jpg"), "fake-image-data");
+    writeFileSync(
+      join(tmpDir, "issues", "issue-10.md"),
+      "---\nissue: 10\nstatus: ready\ndate: 2026-03-20\n---\n# Newer by date\n\n![Cover](cover.jpg)\n",
+    );
+    writeFileSync(
+      join(tmpDir, "issues", "issue-11.md"),
+      "---\nissue: 11\nstatus: ready\ndate: 2026-03-10\n---\n# Older by date\n\nHello.\n",
+    );
+    writeFileSync(
+      join(tmpDir, "laughing-man.yaml"),
+      `
+name: "Test Newsletter"
+issues_dir: ./issues
+attachments_dir: ./attachments
+web_hosting:
+  provider: cloudflare-pages
+  project: my-newsletter
+email_hosting:
+  from: "Test <test@example.com>"
+  provider: resend
+env: {}
+`.trim(),
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const feed = readFileSync(
+      join(tmpDir, "output", "website", "feed.xml"),
+      "utf8",
+    );
+    expect(feed).toContain('src="https://my-newsletter.pages.dev/images/10/cover.jpg"');
+    expect(feed).not.toContain('src="cover.jpg"');
+    expect(feed).toContain("<lastBuildDate>Fri, 20 Mar 2026 12:00:00 GMT</lastBuildDate>");
+    expect(feed.indexOf("Newer by date")).toBeLessThan(feed.indexOf("Older by date"));
+  });
+
   it("preview mode shows drafts as full entries with no teasers", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),

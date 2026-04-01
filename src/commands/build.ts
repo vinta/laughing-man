@@ -5,7 +5,7 @@ import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
-import type { SiteConfig } from "../types.js";
+import type { SiteConfig, IssueData } from "../types.js";
 
 const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
@@ -55,6 +55,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     : allIssues.filter((i) => i.status === "draft").map((i) => i.issue);
 
   const sorted = [...issues].sort((a, b) => a.issue - b.issue);
+  const feedIssues: IssueData[] = [];
 
   const outputDir = join(configDir, outputDirName);
   const websiteDir = join(outputDir, "website");
@@ -94,6 +95,11 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       config,
     });
     writeFileSync(join(emailDir, `${issue.issue}.html`), emailHtml, "utf8");
+
+    feedIssues.push({
+      ...issue,
+      html: contentWeb,
+    });
   }
 
   const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config });
@@ -141,7 +147,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
   writeFileSync(
     join(websiteDir, "feed.xml"),
-    generateRssFeed({ config, issues: sorted }),
+    generateRssFeed({ config, issues: feedIssues }),
     "utf8",
   );
 

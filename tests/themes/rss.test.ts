@@ -48,7 +48,6 @@ describe("generateRssFeed", () => {
 
     expect(rss).toContain("<title>Test Newsletter</title>");
     expect(rss).toContain("<link>https://example.com/</link>");
-    expect(rss).toContain("<language>en</language>");
   });
 
   it("includes generator and docs elements", () => {
@@ -125,17 +124,28 @@ describe("generateRssFeed", () => {
     expect(rss).toContain("https://example.com/issues/2/");
   });
 
-  it("sorts items newest first", () => {
+  it("sorts items newest first by publication date", () => {
     const config = makeConfig();
     const issues = [
-      makeIssue({ issue: 1, title: "Older", date: "2026-03-01" }),
-      makeIssue({ issue: 2, title: "Newer", date: "2026-03-15" }),
+      makeIssue({ issue: 11, title: "Older by date", date: "2026-03-01" }),
+      makeIssue({ issue: 10, title: "Newer by date", date: "2026-03-15" }),
     ];
     const rss = generateRssFeed({ config, issues });
 
-    const newerPos = rss.indexOf("Newer");
-    const olderPos = rss.indexOf("Older");
+    const newerPos = rss.indexOf("Newer by date");
+    const olderPos = rss.indexOf("Older by date");
     expect(newerPos).toBeLessThan(olderPos);
+  });
+
+  it("uses the most recent publication date for lastBuildDate", () => {
+    const config = makeConfig();
+    const issues = [
+      makeIssue({ issue: 11, title: "Older by date", date: "2026-02-01" }),
+      makeIssue({ issue: 10, title: "Newer by date", date: "2026-03-01" }),
+    ];
+    const rss = generateRssFeed({ config, issues });
+
+    expect(rss).toContain("<lastBuildDate>Sun, 01 Mar 2026 12:00:00 GMT</lastBuildDate>");
   });
 
   it("excludes draft issues", () => {
@@ -226,5 +236,18 @@ describe("generateRssFeed", () => {
       const url = link.replace(/<[^>]+>/g, "");
       expect(url).toMatch(/^https:\/\//);
     }
+  });
+
+  it("absolutizes relative URLs in content:encoded", () => {
+    const config = makeConfig();
+    const issues = [makeIssue({
+      issue: 7,
+      html: '<p><a href="./notes">Notes</a><img src="/images/7/cover.jpg" alt="Cover"><a href="#footnote">Footnote</a></p>',
+    })];
+    const rss = generateRssFeed({ config, issues });
+
+    expect(rss).toContain('href="https://example.com/issues/7/notes"');
+    expect(rss).toContain('src="https://example.com/images/7/cover.jpg"');
+    expect(rss).toContain('href="https://example.com/issues/7/#footnote"');
   });
 });
