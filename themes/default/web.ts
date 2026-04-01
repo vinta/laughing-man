@@ -29,6 +29,7 @@ export function WebPage({ title, issue, date, rawContent, content, config }: Web
   ${ogMetaTags({ title, description, url: canonicalUrl, siteName: config.name, type: "article", publishedTime: date })}
   ${articleJsonLd({ headline: title, datePublished: date ?? "", url: canonicalUrl, description, imageUrl: `${new URL(config.url).origin}/laughing-man.png`, siteName: config.name, siteUrl: `${config.url}/` })}
   <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
+  <link rel="alternate" type="application/rss+xml" title="${escapeHtml(config.name)}" href="${escapeHtml(config.url)}/feed.xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">

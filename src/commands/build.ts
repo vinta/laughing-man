@@ -28,12 +28,13 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const bust = `?v=${Date.now()}`;
   const themeUrl = (name: string) =>
     `${pathToFileURL(join(themesDir, `${name}.${ext}`))}${bust}`;
-  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }, { generateSitemap, generateRobotsTxt }] = await Promise.all([
+  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }, { generateSitemap, generateRobotsTxt }, { generateRssFeed }] = await Promise.all([
     import(themeUrl("email")),
     import(themeUrl("web")),
     import(themeUrl("index")),
     import(themeUrl("not-found")),
     import(themeUrl("seo")),
+    import(themeUrl("rss")),
   ]);
 
   const config = await loadConfig(configDir);
@@ -125,6 +126,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       "  Referrer-Policy: strict-origin-when-cross-origin",
       "  X-Frame-Options: DENY",
       "",
+      "/feed.xml",
+      "  Content-Type: application/rss+xml; charset=utf-8",
+      "",
     ].join("\n"),
     "utf8",
   );
@@ -132,6 +136,12 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   writeFileSync(
     join(websiteDir, "sitemap.xml"),
     generateSitemap(config.url, sorted),
+    "utf8",
+  );
+
+  writeFileSync(
+    join(websiteDir, "feed.xml"),
+    generateRssFeed({ config, issues: sorted }),
     "utf8",
   );
 
