@@ -4,7 +4,10 @@
   "description": "Turn your Markdown into a self-hosted newsletter",
   "type": "module",
   "files": [
-    "dist"
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": "./dist/src/cli.js"

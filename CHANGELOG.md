@@ -2,8 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
+The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.2.0] - 2026-04-01
 
@@ -35,7 +34,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Declare wrangler as a peer dependency
-- Use Node 24 in CI and scope OIDC permissions to job level
 
 ### Fixed
 
@@ -46,17 +44,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Initial release
-- `laughing-man init` command to scaffold config and starter issue
-- `laughing-man build` command to generate static site and email HTML from Markdown
-- `laughing-man preview` command with live reload and email preview routes
-- `laughing-man deploy` command for Cloudflare Pages deployment
-- `laughing-man send` command for Resend Broadcast delivery with `--test` flag
-- `laughing-man stamp` command to add frontmatter to bare Markdown files
-- `laughing-man setup web` command for idempotent Cloudflare Pages project provisioning
-- `laughing-man setup newsletter` command for Resend domain verification
-- Default theme with Laughing Man branding, dark mode, and CJK support
-- MJML-based responsive email template with YouTube thumbnail fallback
-- Subscribe form via Cloudflare Pages Functions (`POST /api/subscribe`)
-- Coming-soon teasers for draft issues on the index page
-- Skip-to-content link and ARIA live regions for accessibility
-- npm Trusted Publishing via GitHub Actions OIDC
