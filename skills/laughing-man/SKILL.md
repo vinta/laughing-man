@@ -14,15 +14,15 @@ Check current state and skip completed steps:
 - `laughing-man.yaml` exists with real values (not placeholders)? Skip steps 1-2.
 - `.env` has `CLOUDFLARE_API_TOKEN`? Skip steps 3-4.
 - `.env` has `RESEND_API_KEY` and Pages secret is set? Skip steps 5-6. Run `setup newsletter` to verify domain status.
-- `.md` issue files already exist with real content (not the init template)? Skip step 8.
+- `.md` issue files already exist with real content (not the init template)? Skip step 9.
 
 Tell the user which steps you're skipping and why, then start from the first incomplete step.
 
 ## Prerequisites
 
-- Bun installed (`curl -fsSL https://bun.sh/install | bash`)
+- Node.js 22+ installed
 - A Cloudflare account (free tier works)
-- A Resend account with a verified sending domain
+- A Resend account (free tier works, domain setup is covered in step 5)
 
 ## Steps
 
@@ -35,6 +35,7 @@ npx @sadcoderlabs/laughing-man init
 ```
 
 Creates:
+
 - `laughing-man.yaml` with placeholder values
 - `your-first-newsletter-issue.md` (a sample draft issue)
 - `.gitignore` entries for `output/` and `preview/`
@@ -44,14 +45,18 @@ Creates:
 
 Ask the user for each value, then edit `laughing-man.yaml`:
 
-| Field                    | Ask                            | Example                          |
-| ------------------------ | ------------------------------ | -------------------------------- |
-| `name`                   | Newsletter name?               | "The Laughing Man"               |
-| `description`            | Short description? (optional)  | "A newsletter by [Name](url)"   |
-| `web_hosting.project`    | Cloudflare Pages project name? | "my-newsletter"                  |
-| `web_hosting.domain`     | Custom domain? (optional)      | "newsletter.example.com"         |
-| `email_hosting.from`     | Sender name and email?         | "Vinta <hello@example.com>"      |
-| `email_hosting.reply_to` | Reply-to email? (optional)     | "hello@example.com"              |
+| Field                    | Ask                            | Example                                        |
+| ------------------------ | ------------------------------ | ---------------------------------------------- |
+| `name`                   | Newsletter name?               | "The Laughing Man"                             |
+| `description`            | Short description? (optional)  | "A newsletter by [Name](url)"                  |
+| `issues_dir`             | Directory with .md files?      | "." (default: current dir)                     |
+| `attachments_dir`        | Image/attachment directory?    | "./attachments" (optional)                     |
+| `web_hosting.project`    | Cloudflare Pages project name? | "my-newsletter"                                |
+| `web_hosting.domain`     | Custom domain? (optional)      | "example.com"                                  |
+| `email_hosting.from`     | Sender name and email?         | "Your Name <your-name@newsletter.example.com>" |
+| `email_hosting.reply_to` | Reply-to email? (optional)     | "your-name@newsletter.example.com"             |
+
+Both `issues_dir` and `attachments_dir` default to `.` in the init template. Only change them if your Markdown files or images live in a different directory.
 
 The site URL is computed automatically: `https://{domain}` if a custom domain is set, otherwise `https://{project}.pages.dev`.
 
@@ -84,7 +89,7 @@ Create `.env` in the newsletter directory:
 CLOUDFLARE_API_TOKEN=<token>
 ```
 
-Never put real tokens in `laughing-man.yaml` if the repo is public.
+The init template writes placeholder values (`cf_xxxxx`, `re_xxxxx`) in the yaml's `env:` section. You can leave them as-is or remove the `env:` block entirely. The `.env` file takes priority over the yaml values.
 
 This env var is used by both `setup web` (Cloudflare SDK) and `deploy` (wrangler). No separate `wrangler login` is needed.
 
@@ -160,15 +165,16 @@ If the user is using an apex domain (e.g., `example.com` rather than `newsletter
 This is expected and correct. Apex domains require:
 
 1. The domain must be a Cloudflare zone on the same account (nameservers pointed to Cloudflare).
-2. The custom domain must be added through Pages *before* the CNAME is created (our `setup web` does this in the right order). Doing it backwards causes a 522 error.
+2. The custom domain must be added through Pages _before_ the CNAME is created (our `setup web` does this in the right order). Doing it backwards causes a 522 error.
 3. Cloudflare automatically flattens the apex CNAME (resolves it to the final IP) on all plans.
 
 Docs:
+
 - https://developers.cloudflare.com/pages/configuration/custom-domains/
 - https://developers.cloudflare.com/dns/cname-flattening/
 - https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-zone-apex/
 
-### 7b. Run setup newsletter
+### 8. Run setup newsletter
 
 ```bash
 npx @sadcoderlabs/laughing-man setup newsletter
@@ -178,7 +184,7 @@ Expected output:
 
 ```
 [ok] Resend API key valid
-[ok] Sender domain "send.example.com" exists (status: verified)   # or "created" if new
+[ok] Sender domain "send.example.com" exists (status: verified)    # or "created" if new
 [ok] Sender domain "send.example.com" is verified                  # when already verified
 [ok] Segment "General" found (seg_xxxxx)                           # or "[ok] N segments found" if multiple
 [ok] Pages secret RESEND_API_KEY set for project "<project>"       # when CLOUDFLARE_API_TOKEN is available
@@ -196,7 +202,7 @@ If no sender domain exists yet, the command registers it with Resend automatical
 
 If Cloudflare auth is missing or the Pages secret update fails, the command falls back to printing the manual `wrangler pages secret put` command.
 
-### 8. Write the first issue
+### 9. Write the first issue
 
 If you ran `init`, a sample `your-first-newsletter-issue.md` already exists as a draft. Edit it or create a new Markdown file in the newsletter directory:
 
@@ -204,6 +210,8 @@ If you ran `init`, a sample `your-first-newsletter-issue.md` already exists as a
 ---
 issue: 1
 status: ready
+title: Welcome to My Newsletter
+date: 2025-01-15
 ---
 
 # Welcome to My Newsletter
@@ -211,11 +219,14 @@ status: ready
 This is the first issue.
 ```
 
-The `status` field controls visibility:
-- `ready` -- included in `build` and `deploy`
-- `draft` -- excluded from `build`, but included in `preview` (unless `--no-drafts` is passed)
+Frontmatter fields:
 
-### 9. Build and deploy
+- `issue` (required) -- positive integer, must be unique across all issues
+- `status` (required) -- `ready` (included in build/deploy) or `draft` (excluded from build, included in preview)
+- `title` (optional) -- overrides the first `#` heading in the body
+- `date` (optional) -- publication date in YYYY-MM-DD format
+
+### 10. Build and deploy
 
 ```bash
 npx @sadcoderlabs/laughing-man build
@@ -225,26 +236,26 @@ npx @sadcoderlabs/laughing-man deploy
 To preview locally before deploying:
 
 ```bash
-npx @sadcoderlabs/laughing-man preview             # includes drafts
-npx @sadcoderlabs/laughing-man preview --no-drafts  # published issues only
+npx @sadcoderlabs/laughing-man preview               # includes drafts
+npx @sadcoderlabs/laughing-man preview --no-drafts   # published issues only (--production also works)
 ```
 
-### 10. Verify
+### 11. Verify
 
 - Check `https://<project>.pages.dev`
 - If custom domain is configured, also check `https://<domain>` (DNS may take a few minutes)
 
 ## Troubleshooting
 
-| Problem                                 | Fix                                                                                      |
-| --------------------------------------- | ---------------------------------------------------------------------------------------- |
-| "Cloudflare API token is invalid"       | Regenerate at dash.cloudflare.com/profile/api-tokens                                     |
-| 403 Unauthorized on `setup web`         | Token needs Account > Cloudflare Pages > Edit. If `web_hosting.domain` is set, also add Zone > DNS > Edit for that specific zone. |
-| "API token lacks required permissions"  | Token needs Account > Cloudflare Pages > Edit. If `web_hosting.domain` is set, also add Zone > DNS > Edit for that specific zone. |
-| "Pages project name X is not available" | Change `web_hosting.project` in laughing-man.yaml                                        |
-| "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Managed records can't be deleted from the DNS page directly. Delete the Worker or Pages project that owns the record under Workers & Pages in the dashboard, or use a different domain/subdomain. |
-| Custom domain shows 522 error           | Wait for DNS propagation (up to 48h), verify CNAME is correct                            |
-| "Resend API key is invalid"                 | Regenerate at resend.com/api-keys. Must have "Full access" permission.                   |
-| `setup newsletter` shows "not yet verified" | Add the DNS records printed by the command, wait a few minutes, re-run.                  |
-| Subscribe form returns "Failed to subscribe" | Resend secret not set on Pages project. Re-run `setup newsletter` with a valid `CLOUDFLARE_API_TOKEN`, or run `bunx wrangler pages secret put RESEND_API_KEY --project-name <project>`. Verify with `bunx wrangler pages secret list --project-name <project>`. |
-| Subscribe form returns "Invalid request" | Request body is not valid JSON or missing `email` field. Check browser console for errors. |
+| Problem                                          | Fix                                                                                                                                                                                                                                                             |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Cloudflare API token is invalid"                | Regenerate at dash.cloudflare.com/profile/api-tokens                                                                                                                                                                                                            |
+| 403 Unauthorized on `setup web`                  | Token needs Account > Cloudflare Pages > Edit. If `web_hosting.domain` is set, also add Zone > DNS > Edit for that specific zone.                                                                                                                               |
+| "API token lacks required permissions"           | Token needs Account > Cloudflare Pages > Edit. If `web_hosting.domain` is set, also add Zone > DNS > Edit for that specific zone.                                                                                                                               |
+| "Pages project name X is not available"          | Change `web_hosting.project` in laughing-man.yaml                                                                                                                                                                                                               |
+| "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Managed records can't be deleted from the DNS page directly. Delete the Worker or Pages project that owns the record under Workers & Pages in the dashboard, or use a different domain/subdomain.     |
+| Custom domain shows 522 error                    | Wait for DNS propagation (up to 48h), verify CNAME is correct                                                                                                                                                                                                   |
+| "Resend API key is invalid"                      | Regenerate at resend.com/api-keys. Must have "Full access" permission.                                                                                                                                                                                          |
+| `setup newsletter` shows "not yet verified"      | Add the DNS records printed by the command, wait a few minutes, re-run.                                                                                                                                                                                         |
+| Subscribe form returns "Failed to subscribe"     | Resend secret not set on Pages project. Re-run `setup newsletter` with a valid `CLOUDFLARE_API_TOKEN`, or run `bunx wrangler pages secret put RESEND_API_KEY --project-name <project>`. Verify with `bunx wrangler pages secret list --project-name <project>`. |
+| Subscribe form returns "Invalid request"         | Request body is not valid JSON or missing `email` field. Check browser console for errors.                                                                                                                                                                      |
