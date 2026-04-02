@@ -9,7 +9,7 @@ import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig, IssueData } from "../types.js";
-import { FAVICON_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, OG_IMAGE_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
+import { FAVICON_SVG_FILE_NAME, FAVICON_ICO_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, OG_IMAGE_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
 
 const formatHtml = (html: string) =>
   html_beautify(html, { indent_size: 2, preserve_newlines: false, indent_inner_html: true });
@@ -133,7 +133,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
   // Copy static assets into website root.
   const assetsDir = resolve(import.meta.dirname, "../../themes/default/assets");
-  for (const file of [FAVICON_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME]) {
+  for (const file of [FAVICON_SVG_FILE_NAME, FAVICON_ICO_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME]) {
     const src = join(assetsDir, file);
     if (existsSync(src)) {
       cpSync(src, join(websiteDir, file));
