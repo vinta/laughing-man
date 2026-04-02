@@ -2,12 +2,16 @@ import { mkdirSync, writeFileSync, rmSync, cpSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
+import { html_beautify } from "js-beautify";
 import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig, IssueData } from "../types.js";
 import { FAVICON_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
+
+const formatHtml = (html: string) =>
+  html_beautify(html, { indent_size: 2, preserve_newlines: false, indent_inner_html: true });
 
 const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
@@ -104,7 +108,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     });
     const issueDir = join(websiteDir, "issues", String(issue.issue));
     mkdirSync(issueDir, { recursive: true });
-    writeFileSync(join(issueDir, "index.html"), webPage, "utf8");
+    writeFileSync(join(issueDir, "index.html"), formatHtml(webPage), "utf8");
 
     const emailHtml = EmailPage({
       title: issue.title,
@@ -112,7 +116,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       content: contentEmail,
       config,
     });
-    writeFileSync(join(emailDir, `${issue.issue}.html`), emailHtml, "utf8");
+    writeFileSync(join(emailDir, `${issue.issue}.html`), formatHtml(emailHtml), "utf8");
 
     feedIssues.push({
       ...issue,
@@ -121,10 +125,10 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   }
 
   const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config, stylesheetHref, subscribeScriptHref });
-  writeFileSync(join(websiteDir, "index.html"), indexHtml, "utf8");
+  writeFileSync(join(websiteDir, "index.html"), formatHtml(indexHtml), "utf8");
 
   const notFoundHtml = NotFoundPage({ config, stylesheetHref });
-  writeFileSync(join(websiteDir, "404.html"), notFoundHtml, "utf8");
+  writeFileSync(join(websiteDir, "404.html"), formatHtml(notFoundHtml), "utf8");
 
   // Copy static assets into website root.
   const assetsDir = resolve(import.meta.dirname, "../../themes/default/assets");
