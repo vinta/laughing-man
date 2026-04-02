@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="themes/default/assets/laughing-man.svg" width="200" alt="Laughing Man logo">
+</p>
+
 # laughing-man
 
 [![npm Version](https://img.shields.io/npm/v/@sadcoderlabs/laughing-man?style=for-the-badge)](https://www.npmjs.com/package/@sadcoderlabs/laughing-man)
