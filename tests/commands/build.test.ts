@@ -151,9 +151,17 @@ env: {}
       join(tmpDir, "output", "website", "index.html"),
       "utf8",
     );
+    const issueHtml = readFileSync(
+      join(tmpDir, "output", "website", "issues", "1", "index.html"),
+      "utf8",
+    );
     expect(indexHtml).toContain("Hello World");
     expect(indexHtml).toMatch(/href="\/styles\.[0-9a-f]{10}\.css"/);
+    expect(indexHtml).toMatch(/<script src="\/subscribe\.[0-9a-f]{10}\.js" defer><\/script>/);
     expect(indexHtml).not.toContain("<style>:root");
+    expect(indexHtml).not.toContain("const subscribeSection = document.getElementById");
+    expect(issueHtml).toMatch(/<script src="\/subscribe\.[0-9a-f]{10}\.js" defer><\/script>/);
+    expect(issueHtml).not.toContain("const subscribeSection = document.getElementById");
   });
 
   it("includes laughing-man credit in generated website footers", async () => {
@@ -235,7 +243,7 @@ env: {}
     expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon.svg"');
   });
 
-  it("writes a hashed stylesheet and marks it immutable", async () => {
+  it("writes hashed stylesheet and subscribe assets and marks them immutable", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),
       "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n",
@@ -245,14 +253,17 @@ env: {}
 
     const websiteFiles = readdirSync(join(tmpDir, "output", "website"));
     const stylesheetFile = websiteFiles.find((name) => /^styles\.[0-9a-f]{10}\.css$/.test(name));
+    const subscribeScriptFile = websiteFiles.find((name) => /^subscribe\.[0-9a-f]{10}\.js$/.test(name));
 
     expect(stylesheetFile).toBeDefined();
+    expect(subscribeScriptFile).toBeDefined();
 
     const headers = readFileSync(
       join(tmpDir, "output", "website", "_headers"),
       "utf8",
     );
     expect(headers).toContain(`/${stylesheetFile}`);
+    expect(headers).toContain(`/${subscribeScriptFile}`);
     expect(headers).toContain("Cache-Control: public, max-age=31536000, immutable");
   });
 

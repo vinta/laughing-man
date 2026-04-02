@@ -1,10 +1,15 @@
 import { readFileSync } from "node:fs";
 
 const stylesPath = new URL("assets/styles.css", import.meta.url).pathname;
+const subscribeScriptPath = new URL("assets/subscribe.js", import.meta.url).pathname;
 const FAVICON_FILE_NAME = "favicon.svg";
 
 export function readStyles() {
   return readFileSync(stylesPath, "utf8");
+}
+
+export function readSubscribeScript() {
+  return readFileSync(subscribeScriptPath, "utf8");
 }
 
 function publicSiteUrl(siteUrl: string): string {

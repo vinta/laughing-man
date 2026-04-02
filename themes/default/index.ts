@@ -5,13 +5,14 @@ import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
 import { ogMetaTags, websiteJsonLd } from "./meta.js";
-import { subscribeScript } from "./subscribe.js";
+import { subscribeScriptTag } from "./subscribe.js";
 
 interface IndexProps {
   issues: IssueData[];
   draftIssueNumbers?: number[];
   config: SiteConfig;
   stylesheetHref: string;
+  subscribeScriptHref: string;
 }
 
 export function IndexPage({
@@ -19,6 +20,7 @@ export function IndexPage({
   config,
   draftIssueNumbers = [],
   stylesheetHref,
+  subscribeScriptHref,
 }: IndexProps): string {
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
 
@@ -84,12 +86,12 @@ export function IndexPage({
         ${config.description ? marked.parse(config.description) : `<p>${escapeHtml(description)}</p>`}
       </div>
       <div id="subscribe">
-        <form class="subscribe-form" id="subscribe-form">
+        <form class="subscribe-form" id="subscribe-form" data-subscribe-form>
           <label class="visually-hidden" for="email">Email address</label>
-          <input id="email" type="email" name="email" placeholder="your@email.com" required>
+          <input id="email" type="email" name="email" placeholder="your@email.com" required data-subscribe-input>
           <button type="submit">Subscribe</button>
         </form>
-        <p class="subscribe-message" id="subscribe-message" role="status" aria-live="polite" hidden></p>
+        <p class="subscribe-message" id="subscribe-message" role="status" aria-live="polite" hidden data-subscribe-message></p>
       </div>
     </section>
     <section id="archive" class="feed">
@@ -101,7 +103,7 @@ export function IndexPage({
     </section>
   </main>
   ${siteFooter(config.name)}
-  ${subscribeScript({ formId: "subscribe-form", inputId: "email", messageId: "subscribe-message" })}
+  ${subscribeScriptTag(subscribeScriptHref)}
 </body>
 </html>`;
 }

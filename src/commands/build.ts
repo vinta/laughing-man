@@ -7,7 +7,7 @@ import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig, IssueData } from "../types.js";
-import { faviconFileName, readStyles } from "../../themes/default/assets.js";
+import { faviconFileName, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
 
 const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
@@ -74,8 +74,13 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const stylesheetHash = createHash("sha256").update(styles).digest("hex").slice(0, 10);
   const stylesheetFileName = `styles.${stylesheetHash}.css`;
   const stylesheetHref = `/${stylesheetFileName}`;
+  const subscribeScript = readSubscribeScript();
+  const subscribeScriptHash = createHash("sha256").update(subscribeScript).digest("hex").slice(0, 10);
+  const subscribeScriptFileName = `subscribe.${subscribeScriptHash}.js`;
+  const subscribeScriptHref = `/${subscribeScriptFileName}`;
 
   writeFileSync(join(websiteDir, stylesheetFileName), styles, "utf8");
+  writeFileSync(join(websiteDir, subscribeScriptFileName), subscribeScript, "utf8");
 
   for (const issue of sorted) {
     const { webHtml: contentWeb, emailHtml: contentEmail } = await processImages({
@@ -95,6 +100,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       content: contentWeb,
       config,
       stylesheetHref,
+      subscribeScriptHref,
     });
     const issueDir = join(websiteDir, "issues", String(issue.issue));
     mkdirSync(issueDir, { recursive: true });
@@ -114,7 +120,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     });
   }
 
-  const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config, stylesheetHref });
+  const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config, stylesheetHref, subscribeScriptHref });
   writeFileSync(join(websiteDir, "index.html"), indexHtml, "utf8");
 
   const notFoundHtml = NotFoundPage({ config, stylesheetHref });
@@ -153,6 +159,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       "  Content-Type: application/rss+xml; charset=utf-8",
       "",
       `/${stylesheetFileName}`,
+      "  Cache-Control: public, max-age=31536000, immutable",
+      "",
+      `/${subscribeScriptFileName}`,
       "  Cache-Control: public, max-age=31536000, immutable",
       "",
     ].join("\n"),
