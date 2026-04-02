@@ -94,5 +94,9 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 | Resend SDK                                   | `/resend/resend-node`                     |
 | Resend API                                   | `/websites/resend`                        |
 | Wrangler                                     | `/cloudflare/workers-sdk`                 |
+| Cloudflare SDK                               | `/cloudflare/cloudflare-typescript`       |
 | Cloudflare Pages                             | `/websites/developers_cloudflare_pages`   |
 | Cloudflare Workers (Pages Functions runtime) | `/websites/developers_cloudflare_workers` |
+| MJML                                         | `/mjmlio/mjml`                            |
+| js-beautify                                  | `/beautifier/js-beautify`                 |
+| yaml                                         | `/eemeli/yaml`                            |
