@@ -5,6 +5,8 @@
 # laughing-man
 
 [![npm Version](https://img.shields.io/npm/v/@sadcoderlabs/laughing-man?style=for-the-badge)](https://www.npmjs.com/package/@sadcoderlabs/laughing-man)
+[![CI](https://img.shields.io/github/actions/workflow/status/sadcoderlabs/laughing-man/ci.yml?style=for-the-badge&label=Build)](https://github.com/sadcoderlabs/laughing-man/actions/workflows/ci.yml)
+[![Agent Friendly](https://img.shields.io/badge/Agent-Friendly-blue?style=for-the-badge)](https://github.com/sadcoderlabs/laughing-man/blob/main/skills/laughing-man/SKILL.md)
 
 Turn your Markdown into a self-hosted newsletter.
 
