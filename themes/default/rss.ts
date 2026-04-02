@@ -1,5 +1,5 @@
 import type { SiteConfig, IssueData } from "../../src/types.js";
-import { faviconUrl } from "./assets.js";
+import { iconUrl } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { plainTextExcerpt, stripMarkdown } from "./meta.js";
 
@@ -82,10 +82,10 @@ export function generateRssFeed({ config, issues }: RssFeedOptions): string {
   const description = config.description
     ? stripMarkdown(config.description)
     : config.name;
-  const channelImageUrl = faviconUrl(config.url);
+  const channelImageUrl = iconUrl(config.url);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:webfeedly="http://webfeedly.com/rss/1.0">
   <channel>
     <title>${escapeHtml(config.name)}</title>
     <link>${escapeHtml(config.url)}/</link>
@@ -95,6 +95,7 @@ export function generateRssFeed({ config, issues }: RssFeedOptions): string {
       <title>${escapeHtml(config.name)}</title>
       <link>${escapeHtml(config.url)}/</link>
     </image>
+    <webfeedly:icon>${escapeHtml(channelImageUrl)}</webfeedly:icon>
     <lastBuildDate>${lastBuildDate}</lastBuildDate>
     <generator>laughing-man</generator>
     <docs>https://cyber.harvard.edu/rss/rss.html</docs>

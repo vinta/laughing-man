@@ -58,14 +58,16 @@ describe("generateRssFeed", () => {
     expect(rss).toContain("<docs>https://cyber.harvard.edu/rss/rss.html</docs>");
   });
 
-  it("includes a channel image that points to a fetchable favicon", () => {
+  it("includes a channel image that points to the PNG icon", () => {
     const config = makeConfig();
     const rss = generateRssFeed({ config, issues: [makeIssue()] });
 
     expect(rss).toContain("<image>");
-    expect(rss).toContain("<url>https://example.com/favicon.svg</url>");
+    expect(rss).toContain("<url>https://example.com/icon-512.png</url>");
     expect(rss).toContain("<title>Test Newsletter</title>");
     expect(rss).toContain("<link>https://example.com/</link>");
+    expect(rss).toContain("<webfeedly:icon>https://example.com/icon-512.png</webfeedly:icon>");
+    expect(rss).toContain('xmlns:webfeedly="http://webfeedly.com/rss/1.0"');
   });
 
   it("strips markdown from channel description", () => {

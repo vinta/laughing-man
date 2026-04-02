@@ -7,7 +7,7 @@ import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig, IssueData } from "../types.js";
-import { FAVICON_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
+import { FAVICON_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
 
 const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
@@ -127,12 +127,15 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   writeFileSync(join(websiteDir, "404.html"), notFoundHtml, "utf8");
 
   // Copy static assets into website root.
-  const faviconSource = resolve(import.meta.dirname, `../../themes/default/assets/${FAVICON_FILE_NAME}`);
-  if (existsSync(faviconSource)) {
-    cpSync(faviconSource, join(websiteDir, FAVICON_FILE_NAME));
+  const assetsDir = resolve(import.meta.dirname, "../../themes/default/assets");
+  for (const file of [FAVICON_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME]) {
+    const src = join(assetsDir, file);
+    if (existsSync(src)) {
+      cpSync(src, join(websiteDir, file));
+    }
   }
 
-  const ogImageSource = resolve(import.meta.dirname, "../../themes/default/assets/laughing-man.png");
+  const ogImageSource = join(assetsDir, "laughing-man.png");
   if (existsSync(ogImageSource)) {
     cpSync(ogImageSource, join(websiteAssetsDir, "laughing-man.png"));
   }
