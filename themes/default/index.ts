@@ -1,22 +1,26 @@
 import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
-import { readStyles, readFaviconDataUri } from "./assets.js";
+import { faviconLinkTags } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
 import { ogMetaTags, websiteJsonLd } from "./meta.js";
-import { subscribeScript } from "./subscribe.js";
+import { subscribeScriptTag } from "./subscribe.js";
 
 interface IndexProps {
   issues: IssueData[];
   draftIssueNumbers?: number[];
   config: SiteConfig;
+  stylesheetHref: string;
+  subscribeScriptHref: string;
 }
 
 export function IndexPage({
   issues,
   config,
   draftIssueNumbers = [],
+  stylesheetHref,
+  subscribeScriptHref,
 }: IndexProps): string {
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
 
@@ -63,11 +67,12 @@ export function IndexPage({
   <link rel="canonical" href="${escapeHtml(config.url)}/">
   ${ogMetaTags({ title: config.name, description, url: `${config.url}/`, siteName: config.name, type: "website" })}
   ${websiteJsonLd({ name: config.name, url: `${config.url}/`, description: config.description })}
-  <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
+  ${faviconLinkTags(config.url)}
+  <link rel="alternate" type="application/rss+xml" title="${escapeHtml(config.name)}" href="${escapeHtml(config.url)}/feed.xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>${readStyles()}</style>
+  <link rel="stylesheet" href="${escapeHtml(stylesheetHref)}">
 </head>
 <body>
   ${siteHeader(config.name)}
@@ -81,12 +86,12 @@ export function IndexPage({
         ${config.description ? marked.parse(config.description) : `<p>${escapeHtml(description)}</p>`}
       </div>
       <div id="subscribe">
-        <form class="subscribe-form" id="subscribe-form">
+        <form class="subscribe-form" id="subscribe-form" data-subscribe-form>
           <label class="visually-hidden" for="email">Email address</label>
-          <input id="email" type="email" name="email" placeholder="your@email.com" required>
+          <input id="email" type="email" name="email" placeholder="your@email.com" required data-subscribe-input>
           <button type="submit">Subscribe</button>
         </form>
-        <p class="subscribe-message" id="subscribe-message" role="status" aria-live="polite" hidden></p>
+        <p class="subscribe-message" id="subscribe-message" role="status" aria-live="polite" hidden data-subscribe-message></p>
       </div>
     </section>
     <section id="archive" class="feed">
@@ -98,7 +103,7 @@ export function IndexPage({
     </section>
   </main>
   ${siteFooter(config.name)}
-  ${subscribeScript({ formId: "subscribe-form", inputId: "email", messageId: "subscribe-message" })}
+  ${subscribeScriptTag(subscribeScriptHref)}
 </body>
 </html>`;
 }

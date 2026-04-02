@@ -4,6 +4,7 @@
   "description": "Turn your Markdown into a self-hosted newsletter",
   "type": "module",
   "files": [
+    "bin",
     "dist",
     "LICENSE",
     "README.md",
@@ -29,11 +30,12 @@
     "resend"
   ],
   "bin": {
-    "laughing-man": "dist/src/cli.js"
+    "laughing-man": "bin/laughing-man"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && cp themes/default/*.css themes/default/*.svg themes/default/*.png dist/themes/default/ && mkdir -p dist/skills/laughing-man && cp skills/laughing-man/SKILL.md dist/skills/laughing-man/",
-    "prepublishOnly": "bun run build",
+    "clean": "rm -rf dist",
+    "build": "bun run clean && tsc --project tsconfig.build.json && mkdir -p dist/skills/laughing-man && cp -R themes/default/assets dist/themes/default/ && cp skills/laughing-man/SKILL.md dist/skills/laughing-man/",
+    "prepack": "bun run build",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },

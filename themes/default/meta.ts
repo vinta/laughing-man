@@ -37,7 +37,7 @@ interface OgMeta {
 
 export function ogMetaTags({ title, description, url, siteName, type, publishedTime }: OgMeta): string {
   const siteOrigin = new URL(url).origin;
-  const imageUrl = `${siteOrigin}/laughing-man.png`;
+  const imageUrl = `${siteOrigin}/assets/laughing-man.png`;
 
   const tags = [
     `<meta name="description" content="${escapeHtml(description)}">`,
@@ -59,7 +59,7 @@ export function ogMetaTags({ title, description, url, siteName, type, publishedT
   return tags.join("\n  ");
 }
 
-function stripMarkdown(text: string): string {
+export function stripMarkdown(text: string): string {
   const tokens = marked.lexer(text);
   return tokens.map(collectText).join(" ").replace(/\s+/g, " ").trim();
 }

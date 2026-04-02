@@ -3,6 +3,7 @@ import { runBuild } from "../../src/commands/build";
 import {
   mkdtempSync,
   mkdirSync,
+  readdirSync,
   writeFileSync,
   rmSync,
   existsSync,
@@ -150,7 +151,17 @@ env: {}
       join(tmpDir, "output", "website", "index.html"),
       "utf8",
     );
+    const issueHtml = readFileSync(
+      join(tmpDir, "output", "website", "issues", "1", "index.html"),
+      "utf8",
+    );
     expect(indexHtml).toContain("Hello World");
+    expect(indexHtml).toMatch(/href="\/assets\/styles\.[0-9a-f]{10}\.css"/);
+    expect(indexHtml).toMatch(/<script src="\/assets\/subscribe\.[0-9a-f]{10}\.js" defer><\/script>/);
+    expect(indexHtml).not.toContain("<style>:root");
+    expect(indexHtml).not.toContain("const subscribeSection = document.getElementById");
+    expect(issueHtml).toMatch(/<script src="\/assets\/subscribe\.[0-9a-f]{10}\.js" defer><\/script>/);
+    expect(issueHtml).not.toContain("const subscribeSection = document.getElementById");
   });
 
   it("includes laughing-man credit in generated website footers", async () => {
@@ -213,6 +224,47 @@ env: {}
     expect(headers).toContain("X-Content-Type-Options: nosniff");
     expect(headers).toContain("X-Frame-Options: DENY");
     expect(headers).toContain("Referrer-Policy: strict-origin-when-cross-origin");
+  });
+
+  it("copies favicon.svg and links to it from generated pages", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    expect(existsSync(join(tmpDir, "output", "website", "favicon.svg"))).toBe(true);
+
+    const indexHtml = readFileSync(
+      join(tmpDir, "output", "website", "index.html"),
+      "utf8",
+    );
+    expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon.svg"');
+  });
+
+  it("writes hashed stylesheet and subscribe assets and marks them immutable", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const assetsFiles = readdirSync(join(tmpDir, "output", "website", "assets"));
+    const stylesheetFile = assetsFiles.find((name) => /^styles\.[0-9a-f]{10}\.css$/.test(name));
+    const subscribeScriptFile = assetsFiles.find((name) => /^subscribe\.[0-9a-f]{10}\.js$/.test(name));
+
+    expect(stylesheetFile).toBeDefined();
+    expect(subscribeScriptFile).toBeDefined();
+
+    const headers = readFileSync(
+      join(tmpDir, "output", "website", "_headers"),
+      "utf8",
+    );
+    expect(headers).toContain(`/assets/${stylesheetFile}`);
+    expect(headers).toContain(`/assets/${subscribeScriptFile}`);
+    expect(headers).toContain("Cache-Control: public, max-age=31536000, immutable");
   });
 
   it("404.html uses general recovery copy and links back into the site", async () => {
@@ -337,7 +389,7 @@ env: {}
     expect(issueHtml).toContain('"@type": "Article"');
     expect(issueHtml).toContain('"headline": "Issue One"');
     expect(issueHtml).toContain('"datePublished": "2026-03-15"');
-    expect(issueHtml).toContain("laughing-man.png");
+    expect(issueHtml).toContain("/assets/laughing-man.png");
   });
 
   it("generates sitemap.xml with index and issue URLs", async () => {
@@ -421,6 +473,45 @@ env: {}
     expect(robots).toContain(
       "Sitemap: https://my-newsletter.pages.dev/sitemap.xml",
     );
+  });
+
+  it("generates feed.xml with absolute published asset URLs and date-based ordering", async () => {
+    mkdirSync(join(tmpDir, "attachments"), { recursive: true });
+    writeFileSync(join(tmpDir, "attachments", "cover.jpg"), "fake-image-data");
+    writeFileSync(
+      join(tmpDir, "issues", "issue-10.md"),
+      "---\nissue: 10\nstatus: ready\ndate: 2026-03-20\n---\n# Newer by date\n\n![Cover](cover.jpg)\n",
+    );
+    writeFileSync(
+      join(tmpDir, "issues", "issue-11.md"),
+      "---\nissue: 11\nstatus: ready\ndate: 2026-03-10\n---\n# Older by date\n\nHello.\n",
+    );
+    writeFileSync(
+      join(tmpDir, "laughing-man.yaml"),
+      `
+name: "Test Newsletter"
+issues_dir: ./issues
+attachments_dir: ./attachments
+web_hosting:
+  provider: cloudflare-pages
+  project: my-newsletter
+email_hosting:
+  from: "Test <test@example.com>"
+  provider: resend
+env: {}
+`.trim(),
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const feed = readFileSync(
+      join(tmpDir, "output", "website", "feed.xml"),
+      "utf8",
+    );
+    expect(feed).toContain('src="https://my-newsletter.pages.dev/issues/10/assets/cover.jpg"');
+    expect(feed).not.toContain('src="cover.jpg"');
+    expect(feed).toContain("<lastBuildDate>Fri, 20 Mar 2026 12:00:00 GMT</lastBuildDate>");
+    expect(feed.indexOf("Newer by date")).toBeLessThan(feed.indexOf("Older by date"));
   });
 
   it("preview mode shows drafts as full entries with no teasers", async () => {

@@ -201,7 +201,7 @@ strong {
 }
 
 .hero h1 {
-  margin: 0 0 1.5rem;
+  margin: 0 0 0.75rem;
   font-size: clamp(2.25rem, 6vw, 3.5rem);
   font-weight: 700;
   color: var(--text);
@@ -609,12 +609,12 @@ strong {
   text-align: center;
   max-inline-size: var(--content-width);
   margin-inline: auto;
-  padding-block: clamp(3.5rem, 8vw, 6.5rem) clamp(1.5rem, 3vw, 2.5rem);
+  padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(1.5rem, 3vw, 2.5rem);
   animation: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .issue-emblem {
-  inline-size: clamp(6.25rem, 14vw, 8.75rem);
+  inline-size: clamp(7.5rem, 16vw, 10rem);
   margin-block-end: 1.5rem;
   opacity: 0.95;
 }

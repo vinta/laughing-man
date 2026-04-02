@@ -1,11 +1,13 @@
 import { mkdirSync, writeFileSync, rmSync, cpSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { createHash } from "node:crypto";
 import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
-import type { SiteConfig } from "../types.js";
+import type { SiteConfig, IssueData } from "../types.js";
+import { FAVICON_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
 
 const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
@@ -28,12 +30,13 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const bust = `?v=${Date.now()}`;
   const themeUrl = (name: string) =>
     `${pathToFileURL(join(themesDir, `${name}.${ext}`))}${bust}`;
-  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }, { generateSitemap, generateRobotsTxt }] = await Promise.all([
+  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }, { generateSitemap, generateRobotsTxt }, { generateRssFeed }] = await Promise.all([
     import(themeUrl("email")),
     import(themeUrl("web")),
     import(themeUrl("index")),
     import(themeUrl("not-found")),
     import(themeUrl("seo")),
+    import(themeUrl("rss")),
   ]);
 
   const config = await loadConfig(configDir);
@@ -54,15 +57,30 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     : allIssues.filter((i) => i.status === "draft").map((i) => i.issue);
 
   const sorted = [...issues].sort((a, b) => a.issue - b.issue);
+  const feedIssues: IssueData[] = [];
 
   const outputDir = join(configDir, outputDirName);
   const websiteDir = join(outputDir, "website");
   const emailDir = join(outputDir, "email");
+  const websiteAssetsDir = join(websiteDir, "assets");
 
   rmSync(outputDir, { recursive: true, force: true });
 
   mkdirSync(websiteDir, { recursive: true });
   mkdirSync(emailDir, { recursive: true });
+  mkdirSync(websiteAssetsDir, { recursive: true });
+
+  const styles = readStyles();
+  const stylesheetHash = createHash("sha256").update(styles).digest("hex").slice(0, 10);
+  const stylesheetFileName = `styles.${stylesheetHash}.css`;
+  const stylesheetHref = `/assets/${stylesheetFileName}`;
+  const subscribeScript = readSubscribeScript();
+  const subscribeScriptHash = createHash("sha256").update(subscribeScript).digest("hex").slice(0, 10);
+  const subscribeScriptFileName = `subscribe.${subscribeScriptHash}.js`;
+  const subscribeScriptHref = `/assets/${subscribeScriptFileName}`;
+
+  writeFileSync(join(websiteAssetsDir, stylesheetFileName), styles, "utf8");
+  writeFileSync(join(websiteAssetsDir, subscribeScriptFileName), subscribeScript, "utf8");
 
   for (const issue of sorted) {
     const { webHtml: contentWeb, emailHtml: contentEmail } = await processImages({
@@ -81,6 +99,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       rawContent: issue.rawContent,
       content: contentWeb,
       config,
+      stylesheetHref,
+      subscribeScriptHref,
     });
     const issueDir = join(websiteDir, "issues", String(issue.issue));
     mkdirSync(issueDir, { recursive: true });
@@ -93,18 +113,28 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       config,
     });
     writeFileSync(join(emailDir, `${issue.issue}.html`), emailHtml, "utf8");
+
+    feedIssues.push({
+      ...issue,
+      html: contentWeb,
+    });
   }
 
-  const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config });
+  const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config, stylesheetHref, subscribeScriptHref });
   writeFileSync(join(websiteDir, "index.html"), indexHtml, "utf8");
 
-  const notFoundHtml = NotFoundPage({ config });
+  const notFoundHtml = NotFoundPage({ config, stylesheetHref });
   writeFileSync(join(websiteDir, "404.html"), notFoundHtml, "utf8");
 
-  // Copy static assets (OG image) into website root
-  const ogImageSource = resolve(import.meta.dirname, "../../themes/default/laughing-man.png");
+  // Copy static assets into website root.
+  const faviconSource = resolve(import.meta.dirname, `../../themes/default/assets/${FAVICON_FILE_NAME}`);
+  if (existsSync(faviconSource)) {
+    cpSync(faviconSource, join(websiteDir, FAVICON_FILE_NAME));
+  }
+
+  const ogImageSource = resolve(import.meta.dirname, "../../themes/default/assets/laughing-man.png");
   if (existsSync(ogImageSource)) {
-    cpSync(ogImageSource, join(websiteDir, "laughing-man.png"));
+    cpSync(ogImageSource, join(websiteAssetsDir, "laughing-man.png"));
   }
 
   // Only route /api/* through Pages Functions; serve everything else as
@@ -125,6 +155,15 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       "  Referrer-Policy: strict-origin-when-cross-origin",
       "  X-Frame-Options: DENY",
       "",
+      "/feed.xml",
+      "  Content-Type: application/rss+xml; charset=utf-8",
+      "",
+      `/assets/${stylesheetFileName}`,
+      "  Cache-Control: public, max-age=31536000, immutable",
+      "",
+      `/assets/${subscribeScriptFileName}`,
+      "  Cache-Control: public, max-age=31536000, immutable",
+      "",
     ].join("\n"),
     "utf8",
   );
@@ -132,6 +171,12 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   writeFileSync(
     join(websiteDir, "sitemap.xml"),
     generateSitemap(config.url, sorted),
+    "utf8",
+  );
+
+  writeFileSync(
+    join(websiteDir, "feed.xml"),
+    generateRssFeed({ config, issues: feedIssues }),
     "utf8",
   );
 

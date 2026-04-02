@@ -1,5 +1,5 @@
 import { watch, existsSync, readFileSync, readdirSync, createReadStream, statSync } from "node:fs";
-import { join, resolve, extname } from "node:path";
+import { join, resolve, extname, basename } from "node:path";
 import { createServer } from "node:http";
 import { runBuild } from "./build.js";
 import { handleSubscribe } from "../../functions/api/subscribe.js";
@@ -19,11 +19,49 @@ const MIME_TYPES: Record<string, string> = {
   ".jpeg": "image/jpeg",
   ".gif": "image/gif",
   ".svg": "image/svg+xml",
+  ".xml": "application/xml; charset=utf-8",
   ".ico": "image/x-icon",
   ".webp": "image/webp",
   ".woff": "font/woff",
   ".woff2": "font/woff2",
 };
+
+export function getPreviewContentType(pathname: string, filePath: string): string {
+  if (pathname === "/feed.xml") {
+    return "application/rss+xml; charset=utf-8";
+  }
+
+  const ext = extname(filePath);
+  return MIME_TYPES[ext] ?? "application/octet-stream";
+}
+
+export function shouldIgnorePreviewWatchEvent(
+  filename: string | null,
+  issuesDir: string,
+  previewOutputDir: string,
+): boolean {
+  // Node's fs.watch may omit filenames on macOS. Treat those events as
+  // non-actionable here instead of guessing, otherwise preview's own writes
+  // can trigger rebuild loops when preview/ lives under issues_dir.
+  if (!filename) {
+    return true;
+  }
+
+  const filePath = resolve(issuesDir, filename);
+  const parts = filePath.split(/[/\\]/);
+
+  if (filePath.startsWith(previewOutputDir)) {
+    return true;
+  }
+
+  if (parts.includes("output") || parts.includes("preview") || parts.includes("node_modules") || parts.includes(".git")) {
+    return true;
+  }
+
+  // runBuild only scans top-level Markdown issue files inside issues_dir, so
+  // ignore watcher noise from unrelated files at the project root.
+  return basename(filePath) !== filename || extname(filename) !== ".md";
+}
 
 export async function runPreview(options: PreviewOptions): Promise<void> {
   const { configDir, includeDrafts } = options;
@@ -73,23 +111,10 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
     }, 300);
   }
 
-  function shouldIgnore(filename: string | null) {
-    if (!filename) {
-      // macOS may report null for non-ASCII filenames. Rebuild unless the
-      // preview dir was recently touched (which means a build just ran and
-      // these events are from preview writes, not user edits).
-      try {
-        const previewMtime = statSync(previewOutputDir).mtimeMs;
-        if (Date.now() - previewMtime < 2000) return true;
-      } catch {}
-      return false;
-    }
-    const parts = filename.split(/[/\\]/);
-    return parts.includes("output") || parts.includes("preview") || parts.includes("node_modules") || parts.includes(".git");
-  }
-
   watch(config.issues_dir, { recursive: true }, (_event, filename) => {
-    if (!shouldIgnore(filename)) scheduleRebuild();
+    if (!shouldIgnorePreviewWatchEvent(filename, config.issues_dir, previewOutputDir)) {
+      scheduleRebuild();
+    }
   });
   watch(themesDir, { recursive: true }, () => scheduleRebuild());
   watch(join(configDir, "laughing-man.yaml"), () => scheduleRebuild());
@@ -223,8 +248,7 @@ ${reloadScript}
         return;
       }
 
-      const ext = extname(filePath);
-      const contentType = MIME_TYPES[ext] ?? "application/octet-stream";
+      const contentType = getPreviewContentType(url.pathname, filePath);
       const stat = statSync(filePath);
       res.writeHead(200, { "Content-Type": contentType, "Content-Length": stat.size });
       createReadStream(filePath).pipe(res);

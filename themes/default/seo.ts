@@ -45,5 +45,6 @@ export function generateRobotsTxt(siteUrl: string): string {
 Allow: /
 
 Sitemap: ${siteUrl}/sitemap.xml
+RSS: ${siteUrl}/feed.xml
 `;
 }
