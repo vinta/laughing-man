@@ -16,9 +16,7 @@ function publicSiteUrl(siteUrl: string): string {
   return siteUrl.replace(/\/$/, "");
 }
 
-export function faviconFileName(): string {
-  return FAVICON_FILE_NAME;
-}
+export { FAVICON_FILE_NAME };
 
 export function faviconUrl(siteUrl: string): string {
   return `${publicSiteUrl(siteUrl)}/${FAVICON_FILE_NAME}`;

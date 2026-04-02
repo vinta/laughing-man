@@ -59,7 +59,7 @@ export function ogMetaTags({ title, description, url, siteName, type, publishedT
   return tags.join("\n  ");
 }
 
-function stripMarkdown(text: string): string {
+export function stripMarkdown(text: string): string {
   const tokens = marked.lexer(text);
   return tokens.map(collectText).join(" ").replace(/\s+/g, " ").trim();
 }
