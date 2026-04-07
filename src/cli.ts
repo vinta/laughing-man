@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { readFileSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { runInit } from "./commands/init.js";
 import { runBuild } from "./commands/build.js";
 import { runPreview } from "./commands/preview.js";
@@ -21,7 +23,15 @@ function showHelp(text: string): never {
 async function main(): Promise<void> {
   const command = args[0];
 
-  if (!command || command === "--help" || command === "-h") {
+  if (command === "--version" || command === "version") {
+    let dir = import.meta.dirname;
+    while (!existsSync(resolve(dir, "package.json"))) dir = resolve(dir, "..");
+    const pkg = JSON.parse(readFileSync(resolve(dir, "package.json"), "utf8"));
+    console.log(pkg.version);
+    process.exit(0);
+  }
+
+  if (!command || command === "--help" || command === "-h" || command === "help") {
     showHelp(`laughing-man -- Turn your Markdown into a self-hosted newsletter.
 
 Commands:
