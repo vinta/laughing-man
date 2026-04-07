@@ -54,7 +54,7 @@ export function ogMetaTags({ title, description, url, siteName, type, publishedT
     tags.push(`<meta property="article:published_time" content="${escapeHtml(publishedTime)}">`);
   }
 
-  if (authorName) {
+  if (type === "article" && authorName) {
     tags.push(`<meta property="article:author" content="${escapeHtml(authorName)}">`);
   }
 

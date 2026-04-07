@@ -567,8 +567,9 @@ env: {}
     expect(issueHtml).toContain('<meta name="author" content="Jane Doe">');
     expect(notFoundHtml).toContain('<meta name="author" content="Jane Doe">');
 
-    // OG article:author on issue pages
+    // OG article:author only on issue pages, not index
     expect(issueHtml).toContain('<meta property="article:author" content="Jane Doe">');
+    expect(indexHtml).not.toContain("article:author");
 
     // JSON-LD author on index
     expect(indexHtml).toContain('"@type": "Person"');
