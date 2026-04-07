@@ -110,6 +110,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const issueDir = join(websiteDir, "issues", String(issue.issue));
     mkdirSync(issueDir, { recursive: true });
     writeFileSync(join(issueDir, "index.html"), formatHtml(webPage), "utf8");
+    writeFileSync(join(issueDir, "index.md"), issue.rawContent, "utf8");
 
     const emailHtml = EmailPage({
       title: issue.title,
@@ -170,6 +171,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       "",
       "/llms.txt",
       "  Content-Type: text/plain; charset=utf-8",
+      "",
+      "/issues/*.md",
+      "  Content-Type: text/markdown; charset=utf-8",
       "",
       `/assets/${stylesheetFileName}`,
       "  Cache-Control: public, max-age=31536000, immutable",
