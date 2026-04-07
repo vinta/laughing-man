@@ -524,6 +524,7 @@ name: "Test Newsletter"
 author:
   name: Jane Doe
   url: https://janedoe.com
+  x_handle: janedoe
 issues_dir: ./issues
 web_hosting:
   provider: cloudflare-pages
@@ -567,9 +568,13 @@ env: {}
     expect(issueHtml).toContain('<meta name="author" content="Jane Doe">');
     expect(notFoundHtml).toContain('<meta name="author" content="Jane Doe">');
 
-    // OG article:author only on issue pages, not index
-    expect(issueHtml).toContain('<meta property="article:author" content="Jane Doe">');
+    // OG article:author uses URL, only on issue pages
+    expect(issueHtml).toContain('<meta property="article:author" content="https://janedoe.com">');
     expect(indexHtml).not.toContain("article:author");
+
+    // twitter:creator on all pages
+    expect(issueHtml).toContain('<meta name="twitter:creator" content="@janedoe">');
+    expect(indexHtml).toContain('<meta name="twitter:creator" content="@janedoe">');
 
     // JSON-LD author on index
     expect(indexHtml).toContain('"@type": "Person"');
@@ -616,6 +621,8 @@ env: {}
     expect(indexHtml).not.toContain('name="author"');
     expect(issueHtml).not.toContain('name="author"');
     expect(issueHtml).not.toContain("article:author");
+    expect(indexHtml).not.toContain("twitter:creator");
+    expect(issueHtml).not.toContain("twitter:creator");
     expect(feed).not.toContain("managingEditor");
     expect(llmsTxt).not.toContain("## Author");
   });

@@ -34,10 +34,11 @@ interface OgMeta {
   siteName: string;
   type: "website" | "article";
   publishedTime?: string;
-  authorName?: string;
+  authorUrl?: string;
+  authorXHandle?: string;
 }
 
-export function ogMetaTags({ title, description, url, siteName, type, publishedTime, authorName }: OgMeta): string {
+export function ogMetaTags({ title, description, url, siteName, type, publishedTime, authorUrl, authorXHandle }: OgMeta): string {
   const imageUrl = ogImageUrl(new URL(url).origin);
 
   const tags = [
@@ -54,12 +55,17 @@ export function ogMetaTags({ title, description, url, siteName, type, publishedT
     tags.push(`<meta property="article:published_time" content="${escapeHtml(publishedTime)}">`);
   }
 
-  if (type === "article" && authorName) {
-    tags.push(`<meta property="article:author" content="${escapeHtml(authorName)}">`);
+  if (type === "article" && authorUrl) {
+    tags.push(`<meta property="article:author" content="${escapeHtml(authorUrl)}">`);
   }
 
   tags.push(`<meta name="twitter:card" content="summary_large_image">`);
   tags.push(`<meta name="twitter:image" content="${escapeHtml(imageUrl)}">`);
+
+  if (authorXHandle) {
+    const handle = authorXHandle.startsWith("@") ? authorXHandle : `@${authorXHandle}`;
+    tags.push(`<meta name="twitter:creator" content="${escapeHtml(handle)}">`);
+  }
 
   return tags.join("\n  ");
 }

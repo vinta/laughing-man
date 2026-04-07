@@ -18,7 +18,7 @@ export interface IssueData {
 export interface SiteConfig {
   name: string;
   description?: string;
-  author?: { name: string; url?: string };
+  author?: { name: string; url?: string; x_handle?: string };
   url: string;                    // Computed: https://{domain} or https://{project}.pages.dev
   issues_dir: string;           // Resolved absolute path
   attachments_dir?: string;     // Resolved absolute path (optional)

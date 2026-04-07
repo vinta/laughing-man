@@ -66,7 +66,7 @@ export function IndexPage({
   ${config.author ? `<meta name="author" content="${escapeHtml(config.author.name)}">` : ""}
   <title>${escapeHtml(config.name)}</title>
   <link rel="canonical" href="${escapeHtml(config.url)}/">
-  ${ogMetaTags({ title: config.name, description, url: `${config.url}/`, siteName: config.name, type: "website", authorName: config.author?.name })}
+  ${ogMetaTags({ title: config.name, description, url: `${config.url}/`, siteName: config.name, type: "website", authorXHandle: config.author?.x_handle })}
   ${websiteJsonLd({ name: config.name, url: `${config.url}/`, description: config.description, author: config.author })}
   ${faviconLinkTags()}
   <link rel="alternate" type="application/rss+xml" title="${escapeHtml(config.name)}" href="${escapeHtml(config.url)}/feed.xml">

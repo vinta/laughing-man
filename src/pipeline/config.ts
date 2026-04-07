@@ -10,6 +10,7 @@ const ConfigSchema = z.object({
   author: z.object({
     name: z.string(),
     url: z.string().optional(),
+    x_handle: z.string().optional(),
   }).optional(),
   issues_dir: z.string().default("."),
   attachments_dir: z.string().optional(),
