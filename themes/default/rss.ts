@@ -97,7 +97,7 @@ export function generateRssFeed({ config, issues }: RssFeedOptions): string {
     </image>
     <webfeedly:icon>${escapeHtml(channelImageUrl)}</webfeedly:icon>
     <lastBuildDate>${lastBuildDate}</lastBuildDate>
-    <generator>laughing-man</generator>
+    <generator>laughing-man</generator>${config.author ? `\n    <managingEditor>${escapeHtml(config.author.name)}</managingEditor>` : ""}
     <docs>https://cyber.harvard.edu/rss/rss.html</docs>
     <atom:link href="${escapeHtml(feedUrl)}" rel="self" type="application/rss+xml" />
 ${items}

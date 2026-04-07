@@ -34,9 +34,10 @@ interface OgMeta {
   siteName: string;
   type: "website" | "article";
   publishedTime?: string;
+  authorName?: string;
 }
 
-export function ogMetaTags({ title, description, url, siteName, type, publishedTime }: OgMeta): string {
+export function ogMetaTags({ title, description, url, siteName, type, publishedTime, authorName }: OgMeta): string {
   const imageUrl = ogImageUrl(new URL(url).origin);
 
   const tags = [
@@ -51,6 +52,10 @@ export function ogMetaTags({ title, description, url, siteName, type, publishedT
 
   if (type === "article" && publishedTime) {
     tags.push(`<meta property="article:published_time" content="${escapeHtml(publishedTime)}">`);
+  }
+
+  if (authorName) {
+    tags.push(`<meta property="article:author" content="${escapeHtml(authorName)}">`);
   }
 
   tags.push(`<meta name="twitter:card" content="summary_large_image">`);
@@ -74,9 +79,10 @@ interface WebsiteJsonLdInput {
   name: string;
   url: string;
   description?: string;
+  author?: { name: string; url?: string };
 }
 
-export function websiteJsonLd({ name, url, description }: WebsiteJsonLdInput): string {
+export function websiteJsonLd({ name, url, description, author }: WebsiteJsonLdInput): string {
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -85,6 +91,11 @@ export function websiteJsonLd({ name, url, description }: WebsiteJsonLdInput): s
   };
   if (description) {
     data.description = stripMarkdown(description);
+  }
+  if (author) {
+    const person: Record<string, unknown> = { "@type": "Person", name: author.name };
+    if (author.url) person.url = author.url;
+    data.author = person;
   }
   return jsonLdScript(data);
 }
@@ -97,6 +108,7 @@ interface ArticleJsonLdInput {
   imageUrl: string;
   siteName: string;
   siteUrl: string;
+  author?: { name: string; url?: string };
 }
 
 export function articleJsonLd({
@@ -107,8 +119,9 @@ export function articleJsonLd({
   imageUrl,
   siteName,
   siteUrl,
+  author,
 }: ArticleJsonLdInput): string {
-  return jsonLdScript({
+  const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline,
@@ -121,5 +134,11 @@ export function articleJsonLd({
       name: siteName,
       url: siteUrl,
     },
-  });
+  };
+  if (author) {
+    const person: Record<string, unknown> = { "@type": "Person", name: author.name };
+    if (author.url) person.url = author.url;
+    data.author = person;
+  }
+  return jsonLdScript(data);
 }

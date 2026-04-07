@@ -63,10 +63,11 @@ export function IndexPage({
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  ${config.author ? `<meta name="author" content="${escapeHtml(config.author.name)}">` : ""}
   <title>${escapeHtml(config.name)}</title>
   <link rel="canonical" href="${escapeHtml(config.url)}/">
-  ${ogMetaTags({ title: config.name, description, url: `${config.url}/`, siteName: config.name, type: "website" })}
-  ${websiteJsonLd({ name: config.name, url: `${config.url}/`, description: config.description })}
+  ${ogMetaTags({ title: config.name, description, url: `${config.url}/`, siteName: config.name, type: "website", authorName: config.author?.name })}
+  ${websiteJsonLd({ name: config.name, url: `${config.url}/`, description: config.description, author: config.author })}
   ${faviconLinkTags()}
   <link rel="alternate" type="application/rss+xml" title="${escapeHtml(config.name)}" href="${escapeHtml(config.url)}/feed.xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">

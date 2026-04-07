@@ -59,6 +59,7 @@ export function generateLlmsTxt(
   name: string,
   description: string | undefined,
   issues: readonly LlmsTxtIssue[],
+  author?: { name: string; url?: string },
 ): string {
   const lines: string[] = [`# ${name}`];
 
@@ -72,6 +73,11 @@ export function generateLlmsTxt(
       const dateSuffix = i.date ? ` (${i.date})` : "";
       lines.push(`- [Issue ${i.issue}: ${i.title}](${siteUrl}/issues/${i.issue}/)${dateSuffix}`);
     }
+  }
+
+  if (author) {
+    lines.push("", "## Author", "");
+    lines.push(author.url ? `- [${author.name}](${author.url})` : `- ${author.name}`);
   }
 
   lines.push("");

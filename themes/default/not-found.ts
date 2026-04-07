@@ -15,6 +15,7 @@ export function NotFoundPage({ config, stylesheetHref }: NotFoundProps): string 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  ${config.author ? `<meta name="author" content="${escapeHtml(config.author.name)}">` : ""}
   <title>404 - ${escapeHtml(config.name)}</title>
   ${faviconLinkTags()}
   <link rel="preconnect" href="https://fonts.googleapis.com">

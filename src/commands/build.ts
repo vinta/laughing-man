@@ -198,7 +198,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
   writeFileSync(
     join(websiteDir, "llms.txt"),
-    generateLlmsTxt(config.url, config.name, config.description, sorted),
+    generateLlmsTxt(config.url, config.name, config.description, sorted, config.author),
     "utf8",
   );
 

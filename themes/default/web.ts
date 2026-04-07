@@ -26,10 +26,11 @@ export function WebPage({ title, issue, date, rawContent, content, config, style
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  ${config.author ? `<meta name="author" content="${escapeHtml(config.author.name)}">` : ""}
   <title>${escapeHtml(title)} - ${escapeHtml(config.name)}</title>
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
-  ${ogMetaTags({ title, description, url: canonicalUrl, siteName: config.name, type: "article", publishedTime: date })}
-  ${articleJsonLd({ headline: title, datePublished: date ?? "", url: canonicalUrl, description, imageUrl: ogImageUrl(config.url), siteName: config.name, siteUrl: `${config.url}/` })}
+  ${ogMetaTags({ title, description, url: canonicalUrl, siteName: config.name, type: "article", publishedTime: date, authorName: config.author?.name })}
+  ${articleJsonLd({ headline: title, datePublished: date ?? "", url: canonicalUrl, description, imageUrl: ogImageUrl(config.url), siteName: config.name, siteUrl: `${config.url}/`, author: config.author })}
   ${faviconLinkTags()}
   <link rel="alternate" type="application/rss+xml" title="${escapeHtml(config.name)}" href="${escapeHtml(config.url)}/feed.xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
