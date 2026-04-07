@@ -14,7 +14,7 @@ Write your newsletter in Markdown with whatever tools you like (Obsidian, Logseq
 
 ## Installation
 
-Requires Node.js 22+ and a domain name.
+Requires Node.js 22+ (for npx) and a domain name.
 
 ```bash
 npm install -g @sadcoderlabs/laughing-man
@@ -58,6 +58,11 @@ name: Your Newsletter Name
 description: A newsletter by [Your Name](https://blog.example.com)
 issues_dir: .
 attachments_dir: .
+
+author:
+  name: Your Name
+  url: https://example.com
+  x_handle: "@your_handle"
 
 web_hosting:
   provider: cloudflare-pages

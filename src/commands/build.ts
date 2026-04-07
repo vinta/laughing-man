@@ -35,7 +35,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const bust = `?v=${Date.now()}`;
   const themeUrl = (name: string) =>
     `${pathToFileURL(join(themesDir, `${name}.${ext}`))}${bust}`;
-  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }, { generateSitemap, generateRobotsTxt }, { generateRssFeed }] = await Promise.all([
+  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }, { generateSitemap, generateRobotsTxt, generateLlmsTxt }, { generateRssFeed }] = await Promise.all([
     import(themeUrl("email")),
     import(themeUrl("web")),
     import(themeUrl("index")),
@@ -110,6 +110,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const issueDir = join(websiteDir, "issues", String(issue.issue));
     mkdirSync(issueDir, { recursive: true });
     writeFileSync(join(issueDir, "index.html"), formatHtml(webPage), "utf8");
+    writeFileSync(join(websiteDir, "issues", `${issue.issue}.md`), issue.rawContent, "utf8");
 
     const emailHtml = EmailPage({
       title: issue.title,
@@ -147,6 +148,13 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     }
   }
 
+  // Redirect /issues/N.html to /issues/N/ (canonical URL)
+  writeFileSync(
+    join(websiteDir, "_redirects"),
+    "/issues/:num.html /issues/:num/ 301\n",
+    "utf8",
+  );
+
   // Only route /api/* through Pages Functions; serve everything else as
   // static assets (free requests, lower latency, no CPU metering).
   writeFileSync(
@@ -167,6 +175,12 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       "",
       "/feed.xml",
       "  Content-Type: application/rss+xml; charset=utf-8",
+      "",
+      "/llms.txt",
+      "  Content-Type: text/plain; charset=utf-8",
+      "",
+      "/issues/*.md",
+      "  Content-Type: text/markdown; charset=utf-8",
       "",
       `/assets/${stylesheetFileName}`,
       "  Cache-Control: public, max-age=31536000, immutable",
@@ -193,6 +207,12 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   writeFileSync(
     join(websiteDir, "robots.txt"),
     generateRobotsTxt(config.url),
+    "utf8",
+  );
+
+  writeFileSync(
+    join(websiteDir, "llms.txt"),
+    generateLlmsTxt(config.url, config.name, config.description, sorted, config.author),
     "utf8",
   );
 

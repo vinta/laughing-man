@@ -516,6 +516,117 @@ env: {}
     expect(feed.indexOf("Newer by date")).toBeLessThan(feed.indexOf("Older by date"));
   });
 
+  it("includes author metadata in outputs when author is configured", async () => {
+    writeFileSync(
+      join(tmpDir, "laughing-man.yaml"),
+      `
+name: "Test Newsletter"
+author:
+  name: Jane Doe
+  url: https://janedoe.com
+  x_handle: janedoe
+issues_dir: ./issues
+web_hosting:
+  provider: cloudflare-pages
+  project: my-newsletter
+email_hosting:
+  from: "Test <test@example.com>"
+  provider: resend
+env: {}
+`.trim(),
+    );
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nHello.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const indexHtml = readFileSync(
+      join(tmpDir, "output", "website", "index.html"),
+      "utf8",
+    );
+    const issueHtml = readFileSync(
+      join(tmpDir, "output", "website", "issues", "1", "index.html"),
+      "utf8",
+    );
+    const feed = readFileSync(
+      join(tmpDir, "output", "website", "feed.xml"),
+      "utf8",
+    );
+    const llmsTxt = readFileSync(
+      join(tmpDir, "output", "website", "llms.txt"),
+      "utf8",
+    );
+    const notFoundHtml = readFileSync(
+      join(tmpDir, "output", "website", "404.html"),
+      "utf8",
+    );
+
+    // HTML meta author tag
+    expect(indexHtml).toContain('<meta name="author" content="Jane Doe">');
+    expect(issueHtml).toContain('<meta name="author" content="Jane Doe">');
+    expect(notFoundHtml).toContain('<meta name="author" content="Jane Doe">');
+
+    // OG article:author uses URL, only on issue pages
+    expect(issueHtml).toContain('<meta property="article:author" content="https://janedoe.com">');
+    expect(indexHtml).not.toContain("article:author");
+
+    // twitter:creator on all pages
+    expect(issueHtml).toContain('<meta name="twitter:creator" content="@janedoe">');
+    expect(indexHtml).toContain('<meta name="twitter:creator" content="@janedoe">');
+
+    // JSON-LD author on index
+    expect(indexHtml).toContain('"@type": "Person"');
+    expect(indexHtml).toContain('"name": "Jane Doe"');
+
+    // JSON-LD author on issue pages
+    expect(issueHtml).toContain('"@type": "Person"');
+    expect(issueHtml).toContain('"name": "Jane Doe"');
+    expect(issueHtml).toContain('"url": "https://janedoe.com"');
+
+    // RSS managingEditor
+    expect(feed).toContain("<managingEditor>Jane Doe</managingEditor>");
+
+    // llms.txt Author section
+    expect(llmsTxt).toContain("## Author");
+    expect(llmsTxt).toContain("[Jane Doe](https://janedoe.com) ([@janedoe](https://x.com/janedoe))");
+  });
+
+  it("omits author metadata when author is not configured", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nHello.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const indexHtml = readFileSync(
+      join(tmpDir, "output", "website", "index.html"),
+      "utf8",
+    );
+    const issueHtml = readFileSync(
+      join(tmpDir, "output", "website", "issues", "1", "index.html"),
+      "utf8",
+    );
+    const feed = readFileSync(
+      join(tmpDir, "output", "website", "feed.xml"),
+      "utf8",
+    );
+    const llmsTxt = readFileSync(
+      join(tmpDir, "output", "website", "llms.txt"),
+      "utf8",
+    );
+
+    expect(indexHtml).not.toContain('name="author"');
+    expect(issueHtml).not.toContain('name="author"');
+    expect(issueHtml).not.toContain("article:author");
+    expect(indexHtml).not.toContain("twitter:creator");
+    expect(issueHtml).not.toContain("twitter:creator");
+    expect(feed).not.toContain("managingEditor");
+    expect(llmsTxt).not.toContain("## Author");
+  });
+
   it("preview mode shows drafts as full entries with no teasers", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),

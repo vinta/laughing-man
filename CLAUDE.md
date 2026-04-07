@@ -39,7 +39,7 @@ bun run build           # Compile TS + copy assets to dist/
 bun src/cli.ts --help   # Run CLI locally
 ```
 
-Always run `bun run build` after any code change to keep `dist/` in sync.
+A PostToolUse hook auto-runs `bun run build` when source files are edited. If the hook is not active, run it manually after code changes to keep `dist/` in sync.
 
 ### Local CLI Testing
 
@@ -98,3 +98,4 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 | MJML                                         | `/mjmlio/mjml`                            |
 | js-beautify                                  | `/beautifier/js-beautify`                 |
 | yaml                                         | `/eemeli/yaml`                            |
+| Open Graph Protocol                          | `/facebook/open-graph-protocol`           |

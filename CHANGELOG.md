@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4.0] - 2026-04-07
+
+### Added
+
+- Generate `llms.txt` during build with newsletter name, description, issue links (to raw `.md` files), and author section
+- Raw Markdown files written at `/issues/N.md` for LLM consumption
+- `Content-Type` headers for `llms.txt` (`text/plain`) and `.md` files (`text/markdown`) via `_headers`
+- 301 redirect from `/issues/N.html` to `/issues/N/` via `_redirects`
+- Optional `author` config field (`name`, `url`, `x_handle`) in `laughing-man.yaml`
+- Author metadata across all outputs: `<meta name="author">`, JSON-LD `Person`, `article:author` (OG), `twitter:creator`, RSS `<managingEditor>`, and `llms.txt` author section
+- `version`/`--version` and `help` subcommands to CLI
+
 ## [0.3.0] - 2026-04-02
 
 ### Added
