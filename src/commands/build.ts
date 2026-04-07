@@ -110,7 +110,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const issueDir = join(websiteDir, "issues", String(issue.issue));
     mkdirSync(issueDir, { recursive: true });
     writeFileSync(join(issueDir, "index.html"), formatHtml(webPage), "utf8");
-    writeFileSync(join(issueDir, "index.md"), issue.rawContent, "utf8");
+    writeFileSync(join(websiteDir, "issues", `${issue.issue}.md`), issue.rawContent, "utf8");
 
     const emailHtml = EmailPage({
       title: issue.title,
@@ -147,6 +147,13 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       cpSync(src, join(websiteAssetsDir, file));
     }
   }
+
+  // Redirect /issues/N.html to /issues/N/ (canonical URL)
+  writeFileSync(
+    join(websiteDir, "_redirects"),
+    "/issues/:num.html /issues/:num/ 301\n",
+    "utf8",
+  );
 
   // Only route /api/* through Pages Functions; serve everything else as
   // static assets (free requests, lower latency, no CPU metering).

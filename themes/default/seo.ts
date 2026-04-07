@@ -71,7 +71,7 @@ export function generateLlmsTxt(
     lines.push("", "## Issues", "");
     for (const i of issues) {
       const dateSuffix = i.date ? ` (${i.date})` : "";
-      lines.push(`- [Issue ${i.issue}: ${i.title}](${siteUrl}/issues/${i.issue}/index.md)${dateSuffix}`);
+      lines.push(`- [Issue ${i.issue}: ${i.title}](${siteUrl}/issues/${i.issue}.md)${dateSuffix}`);
     }
   }
 
