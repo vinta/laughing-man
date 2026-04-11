@@ -9,7 +9,7 @@ import type { IssueData } from "../types.js";
 import { extractHeading } from "./heading.js";
 import { inferIssueNumber } from "../commands/stamp.js";
 
-const DEFAULT_THEME = "github-light-default";
+const DEFAULT_THEME = "material-theme-lighter";
 
 function createMarked(theme: string) {
   const instance = new Marked();

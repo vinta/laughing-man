@@ -19,7 +19,7 @@ export interface SiteConfig {
   name: string;
   description?: string;
   author?: { name: string; url?: string; x_handle?: string };
-  syntax_highlight?: string;    // Shiki theme name (default: "github-light-default")
+  syntax_highlight_theme?: string;    // Shiki theme name (default: "material-theme-lighter")
   url: string;                    // Computed: https://{domain} or https://{project}.pages.dev
   issues_dir: string;           // Resolved absolute path
   attachments_dir?: string;     // Resolved absolute path (optional)
