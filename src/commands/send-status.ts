@@ -34,12 +34,10 @@ export async function runSendStatus(options: SendStatusOptions): Promise<void> {
   const resend = new Resend(apiKey);
   const provider = createResendProvider(resend);
 
-  const [segments, broadcasts, emails, contacts] = await Promise.all([
-    provider.listSegments(),
-    provider.listBroadcasts(),
-    provider.listEmails(),
-    provider.listContacts(),
-  ]);
+  const segments = await provider.listSegments();
+  const broadcasts = await provider.listBroadcasts();
+  const emails = await provider.listEmails();
+  const contacts = await provider.listContacts();
 
   // Audience line
   const segmentName = segments[0]?.name ?? "Unknown";
