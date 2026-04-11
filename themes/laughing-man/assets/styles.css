@@ -720,7 +720,8 @@ strong {
 .issue-body ol,
 .issue-body blockquote,
 .issue-body pre,
-.issue-body table {
+.issue-body table,
+.issue-body iframe {
   margin-block-end: 1.25rem;
 }
 
