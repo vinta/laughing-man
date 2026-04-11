@@ -25,6 +25,11 @@ interface SendOptions {
 
 const TEST_UNSUBSCRIBE_URL = "https://example.com/unsubscribe-test";
 
+function formatSubject(title: string, issueNumber: number) {
+  if (/^issue\s/i.test(title)) return title;
+  return `Issue #${issueNumber} ${title}`;
+}
+
 export async function runSend(options: SendOptions): Promise<void> {
   const { configDir, issueNumber, yes, testAddress } = options;
 
@@ -62,7 +67,7 @@ export async function runSend(options: SendOptions): Promise<void> {
       to: testAddress,
       from: config.email_hosting.from,
       replyTo: config.email_hosting.reply_to,
-      subject: issue.title,
+      subject: formatSubject(issue.title, issueNumber),
       html: testHtml,
     });
     console.log(`Test email for issue #${issueNumber} sent to ${testAddress}`);
@@ -116,7 +121,7 @@ export async function runSend(options: SendOptions): Promise<void> {
     segmentId,
     from: config.email_hosting.from,
     replyTo: config.email_hosting.reply_to,
-    subject: issue.title,
+    subject: formatSubject(issue.title, issueNumber),
     html,
     name: broadcastName,
   });
