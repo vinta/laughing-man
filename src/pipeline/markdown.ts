@@ -2,10 +2,23 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join, extname } from "node:path";
 import matter from "@11ty/gray-matter";
 import { marked } from "marked";
+import markedShiki from "marked-shiki";
+import { codeToHtml } from "shiki";
 import { z } from "zod";
 import type { IssueData } from "../types.js";
 import { extractHeading } from "./heading.js";
 import { inferIssueNumber } from "../commands/stamp.js";
+
+marked.use(
+  markedShiki({
+    async highlight(code, lang) {
+      return codeToHtml(code, {
+        lang: lang || "text",
+        theme: "github-dark",
+      });
+    },
+  }),
+);
 
 const FrontmatterSchema = z.object({
   issue: z.number({

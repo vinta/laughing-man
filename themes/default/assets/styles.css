@@ -782,6 +782,11 @@ pre {
   border: 1px solid var(--line);
 }
 
+/* Shiki wraps highlighted code in its own <pre>, let it control colors */
+pre.shiki {
+  background-color: var(--shiki-bg, var(--code-bg));
+}
+
 code {
   font-family: var(--font-mono);
   font-size: 0.86em;
