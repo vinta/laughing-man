@@ -63,6 +63,12 @@ export function shouldIgnorePreviewWatchEvent(
     return true;
   }
 
+  // Allow laughing-man.yaml through so config changes trigger rebuilds.
+  // (The dedicated fs.watch on the yaml file is unreliable on macOS.)
+  if (filename === "laughing-man.yaml") {
+    return false;
+  }
+
   // runBuild only scans top-level Markdown issue files inside issues_dir, so
   // ignore watcher noise from unrelated files at the project root.
   return basename(filePath) !== filename || extname(filename) !== ".md";
