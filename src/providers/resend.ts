@@ -9,6 +9,7 @@ export interface BroadcastSummary {
   id: string;
   name: string;
   status: string;
+  sent_at: string | null;
 }
 
 export interface CreateBroadcastParams {
