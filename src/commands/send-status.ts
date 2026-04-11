@@ -79,7 +79,7 @@ export async function runSendStatus(options: SendStatusOptions): Promise<void> {
     const issueNum = parseInt(issueMatch[1], 10);
 
     console.log(`\n=== ${broadcast.name} ===`);
-    console.log(`Sent: ${broadcast.sent_at}`);
+    console.log(`Sent: ${broadcast.sent_at?.replace(/\+00$/, " UTC")}`);
 
     const issueEmails = emailsByIssue.get(issueNum) ?? [];
     console.log(`Recipients: ${issueEmails.length}`);
