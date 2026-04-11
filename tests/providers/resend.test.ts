@@ -193,4 +193,50 @@ describe("createResendProvider", () => {
 
     await expect(provider.listEmails()).rejects.toThrow("Unauthorized");
   });
+
+  it("paginates all contacts from resend.contacts.list", async () => {
+    let callCount = 0;
+    const mockList = mock(async (opts?: { after?: string }) => {
+      callCount++;
+      if (callCount === 1) {
+        return {
+          data: {
+            object: "list",
+            has_more: true,
+            data: [{ id: "c1", email: "a@test.com", unsubscribed: false }],
+          },
+          error: null,
+        };
+      }
+      return {
+        data: {
+          object: "list",
+          has_more: false,
+          data: [{ id: "c2", email: "b@test.com", unsubscribed: true }],
+        },
+        error: null,
+      };
+    });
+
+    const fakeResend = { contacts: { list: mockList } } as any;
+    const provider = createResendProvider(fakeResend);
+
+    const contacts = await provider.listContacts();
+    expect(mockList).toHaveBeenCalledTimes(2);
+    expect(contacts).toHaveLength(2);
+    expect(contacts[0]).toEqual({ id: "c1", email: "a@test.com", unsubscribed: false });
+    expect(contacts[1]).toEqual({ id: "c2", email: "b@test.com", unsubscribed: true });
+  });
+
+  it("throws if resend.contacts.list returns an error", async () => {
+    const mockList = mock(async () => ({
+      data: null,
+      error: { message: "Unauthorized" },
+    }));
+
+    const fakeResend = { contacts: { list: mockList } } as any;
+    const provider = createResendProvider(fakeResend);
+
+    await expect(provider.listContacts()).rejects.toThrow("Unauthorized");
+  });
 });

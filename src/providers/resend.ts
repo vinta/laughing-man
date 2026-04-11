@@ -35,6 +35,12 @@ export interface EmailSummary {
   last_event: string;
 }
 
+export interface ContactSummary {
+  id: string;
+  email: string;
+  unsubscribed: boolean;
+}
+
 export interface ResendProvider {
   listSegments(): Promise<SegmentSummary[]>;
   listBroadcasts(): Promise<BroadcastSummary[]>;
@@ -42,6 +48,7 @@ export interface ResendProvider {
   sendBroadcast(broadcastId: string): Promise<void>;
   sendEmail(params: SendEmailParams): Promise<string>;
   listEmails(): Promise<EmailSummary[]>;
+  listContacts(): Promise<ContactSummary[]>;
 }
 
 export function createResendProvider(client: Resend): ResendProvider {
@@ -88,6 +95,26 @@ export function createResendProvider(client: Resend): ResendProvider {
       if (error) throw new Error(`Resend error: ${error.message}`);
       if (!data?.id) throw new Error("Resend returned no email id");
       return data.id;
+    },
+
+    async listContacts(): Promise<ContactSummary[]> {
+      const all: ContactSummary[] = [];
+      let after: string | undefined;
+      for (;;) {
+        const { data, error } = await client.contacts.list(after ? { after } : undefined);
+        if (error) throw new Error(`Resend error: ${error.message}`);
+        const items = data?.data ?? [];
+        for (const c of items) {
+          all.push({
+            id: c.id,
+            email: c.email,
+            unsubscribed: c.unsubscribed,
+          });
+        }
+        if (!data?.has_more || items.length === 0) break;
+        after = items[items.length - 1].id;
+      }
+      return all;
     },
 
     async listEmails(): Promise<EmailSummary[]> {
