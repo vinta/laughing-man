@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.0] - 2026-04-12
+
+### Added
+
+- Syntax highlighting for code blocks using Shiki, with configurable theme via `syntax_highlight_theme` in `laughing-man.yaml` (default: `material-theme-lighter`)
+- Prefix email subjects with `Issue #N` when not already present
+
+### Changed
+
+- Rename built-in theme from `default` to `laughing-man`
+- Use `maxresdefault` for YouTube thumbnails in email HTML
+
+### Fixed
+
+- Add `margin-bottom` to `img` and `iframe` in email template
+- Add `margin-block-end` to iframes in issue body
+- Allow `laughing-man.yaml` through preview watcher
+
 ## [0.4.0] - 2026-04-07
 
 ### Added
