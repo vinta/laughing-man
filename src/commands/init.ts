@@ -13,6 +13,7 @@ name: Your Newsletter Name
 description: A newsletter by [Your Name](https://blog.example.com)
 issues_dir: .
 attachments_dir: .
+syntax_highlight: github-light-default
 
 author:
   name: Your Name

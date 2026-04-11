@@ -45,7 +45,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   ]);
 
   const config = await loadConfig(configDir);
-  const allIssues = await scanIssuesDir(config.issues_dir);
+  const allIssues = await scanIssuesDir(config.issues_dir, config.syntax_highlight);
 
   for (const b of backfillDates(allIssues)) {
     console.log(`Added date ${b.date} to Issue ${b.issue} (${b.filePath})`);

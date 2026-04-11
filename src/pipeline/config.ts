@@ -14,6 +14,7 @@ const ConfigSchema = z.object({
   }).optional(),
   issues_dir: z.string().default("."),
   attachments_dir: z.string().optional(),
+  syntax_highlight: z.string().default("github-light-default"),
   web_hosting: z.object({
     provider: z.literal("cloudflare-pages"),
     project: z.string(),

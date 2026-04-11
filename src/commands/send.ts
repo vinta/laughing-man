@@ -33,7 +33,7 @@ export async function runSend(options: SendOptions): Promise<void> {
     includeDrafts: false,
   });
 
-  const issues = await scanIssuesDir(config.issues_dir);
+  const issues = await scanIssuesDir(config.issues_dir, config.syntax_highlight);
   const issue = issues.find((i) => i.issue === issueNumber);
   if (!issue) {
     throw new Error(`Issue #${issueNumber} not found in ${config.issues_dir}`);

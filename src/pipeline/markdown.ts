@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join, extname } from "node:path";
 import matter from "@11ty/gray-matter";
-import { marked } from "marked";
+import { Marked } from "marked";
 import markedShiki from "marked-shiki";
 import { codeToHtml } from "shiki";
 import { z } from "zod";
@@ -9,16 +9,22 @@ import type { IssueData } from "../types.js";
 import { extractHeading } from "./heading.js";
 import { inferIssueNumber } from "../commands/stamp.js";
 
-marked.use(
-  markedShiki({
-    async highlight(code, lang) {
-      return codeToHtml(code, {
-        lang: lang || "text",
-        theme: "github-dark",
-      });
-    },
-  }),
-);
+const DEFAULT_THEME = "github-light-default";
+
+function createMarked(theme: string) {
+  const instance = new Marked();
+  instance.use(
+    markedShiki({
+      async highlight(code, lang) {
+        return codeToHtml(code, {
+          lang: lang || "text",
+          theme,
+        });
+      },
+    }),
+  );
+  return instance;
+}
 
 const FrontmatterSchema = z.object({
   issue: z.number({
@@ -39,6 +45,7 @@ const FrontmatterSchema = z.object({
 });
 
 async function parseIssue(
+  md: Marked,
   filePath: string,
   data: Record<string, unknown>,
   content: string,
@@ -51,7 +58,7 @@ async function parseIssue(
 
   const { issue, status, date } = result.data;
   const title = result.data.title ?? extractHeading(content);
-  const html = await marked(content);
+  const html = await md.parse(content);
 
   return {
     issue,
@@ -64,12 +71,13 @@ async function parseIssue(
   };
 }
 
-export async function parseIssueFile(filePath: string): Promise<IssueData> {
+export async function parseIssueFile(filePath: string, theme?: string): Promise<IssueData> {
   const { data, content } = matter(readFileSync(filePath, "utf8"));
-  return parseIssue(filePath, data, content);
+  return parseIssue(createMarked(theme ?? DEFAULT_THEME), filePath, data, content);
 }
 
-export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
+export async function scanIssuesDir(issuesDir: string, theme?: string): Promise<IssueData[]> {
+  const md = createMarked(theme ?? DEFAULT_THEME);
   const files = readdirSync(issuesDir).filter((f) => extname(f) === ".md");
 
   if (files.length === 0) {
@@ -114,5 +122,5 @@ export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
     };
   });
 
-  return Promise.all(resolved.map(({ filePath, data, content }) => parseIssue(filePath, data, content)));
+  return Promise.all(resolved.map(({ filePath, data, content }) => parseIssue(md, filePath, data, content)));
 }
