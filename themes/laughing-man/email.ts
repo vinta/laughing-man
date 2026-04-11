@@ -63,7 +63,9 @@ export function EmailPage({ title, issue, content, config }: EmailPageProps): st
       .issue-body ol,
       .issue-body blockquote,
       .issue-body pre,
-      .issue-body table {
+      .issue-body table,
+      .issue-body iframe,
+      .issue-body img {
         margin: 0 0 20px;
       }
       .issue-body h2 {
