@@ -121,6 +121,7 @@ export function EmailPage({ title, issue, content, config }: EmailPageProps): st
         border-radius: 12px;
         background: #1e2d3d;
         color: #e0e6ed;
+        line-height: 1;
       }
       .issue-body pre code {
         color: inherit;
