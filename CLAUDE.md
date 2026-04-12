@@ -25,9 +25,6 @@ Or run without installing: `npx @sadcoderlabs/laughing-man <command>`
 
 - **Runtime:** Node.js 22+ (published package). Bun for development/testing.
 - **Language:** TypeScript (strict mode)
-- **Dependencies:** zod, yaml, @11ty/gray-matter, marked, marked-shiki, shiki, js-beautify, mjml, resend, cloudflare
-- **Config parsing:** `yaml` package (`parse` from "yaml")
-- **Deployment:** wrangler (runtime dependency bundled with the CLI)
 - **Templates:** Plain TypeScript functions returning HTML strings (no React, no JSX)
 - **Email:** MJML for responsive email HTML
 
@@ -90,6 +87,7 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 | Zod v4                                       | `/websites/zod_dev_v4`                    |
 | gray-matter                                  | `/jonschlinkert/gray-matter`              |
 | marked                                       | `/markedjs/marked`                        |
+| shiki                                        | `/shikijs/shiki`                          |
 | Resend SDK                                   | `/resend/resend-node`                     |
 | Resend API                                   | `/websites/resend`                        |
 | Wrangler                                     | `/cloudflare/workers-sdk`                 |
