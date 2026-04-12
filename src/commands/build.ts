@@ -25,6 +25,7 @@ interface BuildOptions {
 interface BuildResult {
   config: SiteConfig;
   outputDir: string;
+  issues: IssueData[];
 }
 
 export async function runBuild(options: BuildOptions): Promise<BuildResult> {
@@ -132,7 +133,6 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const notFoundHtml = NotFoundPage({ config, stylesheetHref });
   writeFileSync(join(websiteDir, "404.html"), formatHtml(notFoundHtml), "utf8");
 
-  // Copy static assets into website root.
   const assetsDir = resolve(import.meta.dirname, "../../themes/laughing-man/assets");
   for (const file of [FAVICON_SVG_FILE_NAME, FAVICON_ICO_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME]) {
     const src = join(assetsDir, file);
@@ -148,7 +148,6 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     }
   }
 
-  // Redirect /issues/N.html to /issues/N/ (canonical URL)
   writeFileSync(
     join(websiteDir, "_redirects"),
     "/issues/:num.html /issues/:num/ 301\n",
@@ -216,7 +215,6 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     "utf8",
   );
 
-  // Copy Pages Functions into output/ so wrangler can find them
   const functionsSource = resolve(import.meta.dirname, "../../functions");
   if (existsSync(functionsSource)) {
     cpSync(functionsSource, join(outputDir, "functions"), { recursive: true });
@@ -230,5 +228,5 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const summary = parts.length > 0 ? parts.join(", ") : "no issues found";
   console.log(`Build complete: ${summary} — ${outputDir}`);
 
-  return { config, outputDir };
+  return { config, outputDir, issues: allIssues };
 }

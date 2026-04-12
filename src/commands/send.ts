@@ -3,7 +3,6 @@ import { join } from "node:path";
 import { createInterface } from "node:readline";
 import { Resend } from "resend";
 import { runBuild } from "./build.js";
-import { scanIssuesDir } from "../pipeline/markdown.js";
 import { createResendProvider } from "../providers/resend.js";
 
 function askQuestion(question: string) {
@@ -33,12 +32,11 @@ function formatSubject(title: string, issueNumber: number) {
 export async function runSend(options: SendOptions): Promise<void> {
   const { configDir, issueNumber, yes, testAddress } = options;
 
-  const { config } = await runBuild({
+  const { config, issues } = await runBuild({
     configDir,
     includeDrafts: false,
   });
 
-  const issues = await scanIssuesDir(config.issues_dir, config.syntax_highlight_theme);
   const issue = issues.find((i) => i.issue === issueNumber);
   if (!issue) {
     throw new Error(`Issue #${issueNumber} not found in ${config.issues_dir}`);

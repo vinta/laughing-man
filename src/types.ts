@@ -1,10 +1,3 @@
-export interface FrontmatterRaw {
-  issue: number;
-  status: "draft" | "ready";
-  title?: string;
-  date?: string;
-}
-
 export interface IssueData {
   issue: number;
   status: "draft" | "ready";

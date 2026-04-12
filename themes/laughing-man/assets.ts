@@ -22,10 +22,6 @@ function publicSiteUrl(siteUrl: string): string {
 
 export { FAVICON_SVG_FILE_NAME, FAVICON_ICO_FILE_NAME, ICON_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, OG_IMAGE_FILE_NAME };
 
-export function faviconUrl(siteUrl: string): string {
-  return `${publicSiteUrl(siteUrl)}/${FAVICON_SVG_FILE_NAME}`;
-}
-
 export function iconUrl(siteUrl: string): string {
   return `${publicSiteUrl(siteUrl)}/assets/${ICON_FILE_NAME}`;
 }
