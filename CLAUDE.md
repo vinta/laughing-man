@@ -15,6 +15,7 @@ laughing-man preview           # Build (including drafts) + local server with li
 laughing-man stamp             # Add frontmatter to .md files that don't have it
 laughing-man deploy            # Deploy to Cloudflare Pages via wrangler
 laughing-man send <N>          # Send issue N via Resend Broadcast
+laughing-man send status       # Show delivery status for all sent broadcasts
 ```
 
 Install from npm: `npm install -g @sadcoderlabs/laughing-man`
@@ -22,9 +23,9 @@ Or run without installing: `npx @sadcoderlabs/laughing-man <command>`
 
 ## Tech Stack
 
-- **Runtime:** Bun (required, no Node/npx support)
+- **Runtime:** Node.js 22+ (published package). Bun for development/testing.
 - **Language:** TypeScript (strict mode)
-- **Dependencies:** zod, yaml, @11ty/gray-matter, marked, mjml, resend, cloudflare
+- **Dependencies:** zod, yaml, @11ty/gray-matter, marked, marked-shiki, shiki, js-beautify, mjml, resend, cloudflare
 - **Config parsing:** `yaml` package (`parse` from "yaml")
 - **Deployment:** wrangler (runtime dependency bundled with the CLI)
 - **Templates:** Plain TypeScript functions returning HTML strings (no React, no JSX)

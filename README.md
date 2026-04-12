@@ -108,4 +108,5 @@ Set up Resend and send an issue:
 ```bash
 laughing-man setup newsletter          # Verify Resend API key + sender domain + DNS
 laughing-man send <issue-number>       # Send an issue via Resend Broadcast
+laughing-man send status               # Show delivery status for all sent broadcasts
 ```
