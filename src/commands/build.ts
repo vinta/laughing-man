@@ -116,6 +116,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const emailHtml = EmailPage({
       title: issue.title,
       issue: issue.issue,
+      date: issue.date,
       content: contentEmail,
       config,
     });

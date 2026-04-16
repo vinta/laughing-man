@@ -5,6 +5,7 @@ import { escapeHtml } from "./escape.js";
 interface EmailPageProps {
   title: string;
   issue: number;
+  date?: string;
   content: string;
   config: SiteConfig;
 }
@@ -28,7 +29,7 @@ function buildIssueUrl(siteUrl: string, issue: number): string {
   return new URL(`issues/${issue}/`, baseUrl).toString();
 }
 
-export function EmailPage({ title, issue, content, config }: EmailPageProps): string {
+export function EmailPage({ title, issue, date, content, config }: EmailPageProps): string {
   const escapedTitle = escapeHtml(title);
   const name = escapeHtml(config.name);
   const url = escapeHtml(config.url);
@@ -164,7 +165,7 @@ export function EmailPage({ title, issue, content, config }: EmailPageProps): st
           <span style="display:inline-block;width:92px;height:92px;line-height:92px;text-align:center;border:3px solid #005577;border-radius:999px;color:#005577;font-family:'IBM Plex Mono','SFMono-Regular',Menlo,monospace;font-size:24px;font-weight:600;letter-spacing:0.08em;">LM</span>
         </mj-text>
         <mj-text align="center" padding="0 0 12px" font-size="13px" color="#607080" font-family="'IBM Plex Mono','SFMono-Regular',Menlo,monospace" letter-spacing="2px">
-          Issue #${issue}
+          Issue #${issue}${date ? ` / ${date}` : ""}
         </mj-text>
         <mj-text align="center" padding="0 12px 28px" font-size="44px" line-height="1.1" font-weight="700" color="#1e2d3d">
           ${escapedTitle}

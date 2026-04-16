@@ -45,7 +45,7 @@ export function WebPage({ title, issue, date, rawContent, content, config, style
       <div class="issue-emblem" aria-hidden="true">
         ${readLaughingManLogo()}
       </div>
-      <p class="issue-meta">Issue #${issue}</p>
+      <p class="issue-meta">Issue #${issue}${date ? ` / ${date}` : ""}</p>
       <h1>${escapeHtml(title)}</h1>
     </section>
     <section class="issue-reading-surface">
