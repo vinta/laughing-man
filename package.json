@@ -1,6 +1,6 @@
 {
   "name": "laughing-man-cli",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Turn your Markdown into a self-hosted newsletter",
   "type": "module",
   "files": [
