@@ -4,9 +4,9 @@
 
 # laughing-man
 
-[![npm Version](https://img.shields.io/npm/v/@sadcoderlabs/laughing-man?style=for-the-badge)](https://www.npmjs.com/package/@sadcoderlabs/laughing-man)
-[![CI](https://img.shields.io/github/actions/workflow/status/sadcoderlabs/laughing-man/ci.yml?style=for-the-badge&label=Build)](https://github.com/sadcoderlabs/laughing-man/actions/workflows/ci.yml)
-[![Agent Friendly](https://img.shields.io/badge/Agent-Friendly-blue?style=for-the-badge)](https://github.com/sadcoderlabs/laughing-man/blob/main/skills/laughing-man/SKILL.md)
+[![npm Version](https://img.shields.io/npm/v/laughing-man-cli?style=for-the-badge)](https://www.npmjs.com/package/laughing-man-cli)
+[![CI](https://img.shields.io/github/actions/workflow/status/vinta/laughing-man/ci.yml?style=for-the-badge&label=Build)](https://github.com/vinta/laughing-man/actions/workflows/ci.yml)
+[![Agent Friendly](https://img.shields.io/badge/Agent-Friendly-blue?style=for-the-badge)](https://github.com/vinta/laughing-man/blob/main/skills/laughing-man/SKILL.md)
 
 Turn your Markdown into a self-hosted newsletter.
 
@@ -17,13 +17,13 @@ Write your newsletter in Markdown with whatever tools you like (Obsidian, Logseq
 Requires Node.js 22+ (for npx) and a domain name.
 
 ```bash
-npm install -g @sadcoderlabs/laughing-man
+npm install -g laughing-man-cli
 ```
 
 Or run without installing:
 
 ```bash
-npx @sadcoderlabs/laughing-man --help
+npx laughing-man-cli --help
 ```
 
 ## Usage
@@ -31,7 +31,7 @@ npx @sadcoderlabs/laughing-man --help
 If you're the type who skips the manual, just copy this prompt to your agent:
 
 ```prompt
-How do I use this tool? Read https://raw.githubusercontent.com/sadcoderlabs/laughing-man/main/skills/laughing-man/SKILL.md
+How do I use this tool? Read https://raw.githubusercontent.com/vinta/laughing-man/main/skills/laughing-man/SKILL.md
 ```
 
 ### Initiate

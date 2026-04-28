@@ -64,7 +64,7 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
   if (result.error) {
     if ((result.error as NodeJS.ErrnoException).code === "ENOENT") {
       throw new Error(
-        "Bundled wrangler executable was not found. Reinstall @sadcoderlabs/laughing-man.",
+        "Bundled wrangler executable was not found. Reinstall laughing-man-cli.",
       );
     }
 

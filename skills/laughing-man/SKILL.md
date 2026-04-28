@@ -31,7 +31,7 @@ Tell the user which steps you're skipping and why, then start from the first inc
 Run this if no `laughing-man.yaml` exists in the working directory:
 
 ```bash
-npx @sadcoderlabs/laughing-man init
+npx laughing-man-cli init
 ```
 
 Creates:
@@ -138,7 +138,7 @@ Paste the value when prompted. No redeployment is needed. Secrets take effect im
 ### 7. Run setup web
 
 ```bash
-npx @sadcoderlabs/laughing-man setup web
+npx laughing-man-cli setup web
 ```
 
 Expected output (all green):
@@ -180,7 +180,7 @@ Docs:
 ### 8. Run setup newsletter
 
 ```bash
-npx @sadcoderlabs/laughing-man setup newsletter
+npx laughing-man-cli setup newsletter
 ```
 
 Expected output:
@@ -232,15 +232,15 @@ Frontmatter fields:
 ### 10. Build and deploy
 
 ```bash
-npx @sadcoderlabs/laughing-man build
-npx @sadcoderlabs/laughing-man deploy
+npx laughing-man-cli build
+npx laughing-man-cli deploy
 ```
 
 To preview locally before deploying:
 
 ```bash
-npx @sadcoderlabs/laughing-man preview               # includes drafts
-npx @sadcoderlabs/laughing-man preview --no-drafts   # published issues only (--production also works)
+npx laughing-man-cli preview               # includes drafts
+npx laughing-man-cli preview --no-drafts   # published issues only (--production also works)
 ```
 
 ### 11. Verify
