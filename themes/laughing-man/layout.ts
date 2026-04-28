@@ -23,6 +23,6 @@ export function siteFooter(name: string): string {
     <span class="footer-name">${escapeHtml(name)}</span>
     <span class="footer-sep" aria-hidden="true">/</span>
     <span class="footer-credit">Created with
-      <a href="https://github.com/sadcoderlabs/laughing-man" target="_blank" rel="noopener noreferrer">laughing-man</a></span>
+      <a href="https://github.com/vinta/laughing-man" target="_blank" rel="noopener noreferrer">laughing-man</a></span>
   </footer>`;
 }

@@ -183,11 +183,11 @@ env: {}
 
     expect(indexHtml).toContain("Created with");
     expect(indexHtml).toContain(
-      'href="https://github.com/sadcoderlabs/laughing-man"',
+      'href="https://github.com/vinta/laughing-man"',
     );
     expect(issueHtml).toContain("Created with");
     expect(issueHtml).toContain(
-      'href="https://github.com/sadcoderlabs/laughing-man"',
+      'href="https://github.com/vinta/laughing-man"',
     );
   });
 

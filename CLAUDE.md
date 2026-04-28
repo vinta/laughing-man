@@ -18,8 +18,8 @@ laughing-man send <N>          # Send issue N via Resend Broadcast
 laughing-man send status       # Show delivery status for all sent broadcasts
 ```
 
-Install from npm: `npm install -g @sadcoderlabs/laughing-man`
-Or run without installing: `npx @sadcoderlabs/laughing-man <command>`
+Install from npm: `npm install -g laughing-man-cli`
+Or run without installing: `npx laughing-man-cli <command>`
 
 ## Tech Stack
 

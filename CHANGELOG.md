@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.6.0] - 2026-04-28
+
+### Changed
+
+- Renamed npm package from `@sadcoderlabs/laughing-man` to `laughing-man-cli`. Install with `npm i -g laughing-man-cli`. The `laughing-man` command itself is unchanged.
+- GitHub repository moved to `github.com/vinta/laughing-man`.
+
 ## [0.5.0] - 2026-04-12
 
 ### Added
