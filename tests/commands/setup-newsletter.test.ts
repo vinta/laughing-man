@@ -77,6 +77,7 @@ const mockDomainsVerify = mock(async (..._args: any[]) => ({
 })) as any;
 
 mock.module("resend", () => ({
+  ...realResend,
   Resend: class FakeResend {
     segments = {
       list: mockSegmentsList,
@@ -94,6 +95,7 @@ mock.module("resend", () => ({
 }));
 
 mock.module("../../src/pipeline/cloudflare", () => ({
+  ...realCloudflare,
   createClient: mockCreateClient,
   discoverAccountId: mockDiscoverAccountId,
   ensureProject: mockEnsureProject,

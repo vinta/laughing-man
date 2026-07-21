@@ -19,10 +19,12 @@ const mockRunBuild = mock(async () => ({
 })) as any;
 
 mock.module("node:child_process", () => ({
+  ...realChildProcess,
   spawnSync: mockSpawnSync,
 }));
 
 mock.module("../../src/commands/build", () => ({
+  ...realBuild,
   runBuild: mockRunBuild,
 }));
 

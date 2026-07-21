@@ -19,6 +19,7 @@ const mockEnsureDnsRecord = mock((): Promise<{ status: string; domain?: string; 
 const mockCreateClient = mock(() => ({}));
 
 mock.module("../../src/pipeline/cloudflare", () => ({
+  ...realCloudflare,
   createClient: mockCreateClient,
   discoverAccountId: mockDiscoverAccountId,
   ensureProject: mockEnsureProject,

@@ -14,6 +14,7 @@ const mockSendEmail = mock(async () => ({
 }));
 
 mock.module("resend", () => ({
+  ...realResend,
   Resend: class FakeResend {
     segments = {
       list: mock(async () => ({ data: { data: [] }, error: null })),

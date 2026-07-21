@@ -36,6 +36,7 @@ const mockContactsList = mock(async () => ({
 }));
 
 mock.module("resend", () => ({
+  ...realResend,
   Resend: class FakeResend {
     segments = {
       list: mock(async () => ({
