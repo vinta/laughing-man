@@ -1,7 +1,12 @@
-import { describe, expect, it, beforeEach, afterEach, mock, spyOn } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach, afterAll, mock, spyOn } from "bun:test";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import os from "node:os";
+import * as resendModule from "resend";
+
+// Snapshot before mocking: the namespace is a live binding, so spreading it later
+// would capture the mocked exports instead of the real ones
+const realResend = { ...resendModule };
 
 const mockEmailsList = mock(async () => ({
   data: {
@@ -58,6 +63,11 @@ mock.module("resend", () => ({
     constructor(_apiKey: string) {}
   },
 }));
+
+// Bun module mocks persist across test files; restore the real module for later files
+afterAll(() => {
+  mock.module("resend", () => realResend);
+});
 
 const { runSendStatus } = await import("../../src/commands/send-status");
 
