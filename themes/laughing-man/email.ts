@@ -29,7 +29,7 @@ function buildIssueUrl(siteUrl: string, issue: number): string {
   return new URL(`issues/${issue}/`, baseUrl).toString();
 }
 
-export function EmailPage({ title, issue, date, content, config }: EmailPageProps): string {
+export async function EmailPage({ title, issue, date, content, config }: EmailPageProps): Promise<string> {
   const escapedTitle = escapeHtml(title);
   const name = escapeHtml(config.name);
   const url = escapeHtml(config.url);
@@ -206,7 +206,7 @@ export function EmailPage({ title, issue, date, content, config }: EmailPageProp
   </mj-body>
 </mjml>`;
 
-  const { html, errors } = mjml2html(mjml);
+  const { html, errors } = await mjml2html(mjml);
   if (errors.length > 0) {
     throw new Error(`MJML compilation errors: ${errors.map((e) => e.message).join(", ")}`);
   }

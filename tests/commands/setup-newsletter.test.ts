@@ -1,7 +1,14 @@
-import { describe, expect, it, beforeEach, afterEach, mock, spyOn } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach, afterAll, mock, spyOn } from "bun:test";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import os from "node:os";
+import * as resendModule from "resend";
+import * as cloudflareModule from "../../src/pipeline/cloudflare";
+
+// Snapshot before mocking: the namespaces are live bindings, so spreading them later
+// would capture the mocked exports instead of the real ones
+const realResend = { ...resendModule };
+const realCloudflare = { ...cloudflareModule };
 
 const mockCreateClient = mock(() => ({})) as any;
 const mockDiscoverAccountId = mock(async () => "acc_123") as any;
@@ -70,6 +77,7 @@ const mockDomainsVerify = mock(async (..._args: any[]) => ({
 })) as any;
 
 mock.module("resend", () => ({
+  ...realResend,
   Resend: class FakeResend {
     segments = {
       list: mockSegmentsList,
@@ -87,6 +95,7 @@ mock.module("resend", () => ({
 }));
 
 mock.module("../../src/pipeline/cloudflare", () => ({
+  ...realCloudflare,
   createClient: mockCreateClient,
   discoverAccountId: mockDiscoverAccountId,
   ensureProject: mockEnsureProject,
@@ -94,6 +103,12 @@ mock.module("../../src/pipeline/cloudflare", () => ({
   ensureDnsRecord: mockEnsureDnsRecord,
   upsertProjectSecret: mockUpsertProjectSecret,
 }));
+
+// Bun module mocks persist across test files; restore the real modules for later files
+afterAll(() => {
+  mock.module("resend", () => realResend);
+  mock.module("../../src/pipeline/cloudflare", () => realCloudflare);
+});
 
 const { runSetupNewsletter } = await import("../../src/commands/setup-newsletter");
 

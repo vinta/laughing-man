@@ -20,8 +20,8 @@ const testConfig: SiteConfig = {
 };
 
 describe("EmailPage", () => {
-  it("returns valid HTML document", () => {
-    const html = EmailPage({
+  it("returns valid HTML document", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 1,
       content: "<p>Hello world</p>",
@@ -32,8 +32,8 @@ describe("EmailPage", () => {
     expect(html).toContain("</html>");
   });
 
-  it("contains newsletter name linked to site URL", () => {
-    const html = EmailPage({
+  it("contains newsletter name linked to site URL", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 1,
       content: "<p>Hello world</p>",
@@ -44,8 +44,8 @@ describe("EmailPage", () => {
     expect(html).toContain('href="https://example.com"');
   });
 
-  it("contains issue number", () => {
-    const html = EmailPage({
+  it("contains issue number", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 42,
       content: "<p>Hello world</p>",
@@ -55,8 +55,8 @@ describe("EmailPage", () => {
     expect(html).toContain("Issue #42");
   });
 
-  it("links the Read in browser button to the website issue page", () => {
-    const html = EmailPage({
+  it("links the Read in browser button to the website issue page", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 42,
       content: "<p>Hello world</p>",
@@ -67,8 +67,8 @@ describe("EmailPage", () => {
     expect(html).toContain('href="https://example.com/issues/42/"');
   });
 
-  it("contains rendered content", () => {
-    const html = EmailPage({
+  it("contains rendered content", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 1,
       content: "<h2>Section</h2><p>Some content here.</p>",
@@ -79,19 +79,19 @@ describe("EmailPage", () => {
     expect(html).toContain(">Some content here.</p>");
   });
 
-  it("rejects mj-include tags in rendered content", () => {
-    expect(() =>
+  it("rejects mj-include tags in rendered content", async () => {
+    await expect(
       EmailPage({
         title: "My First Issue",
         issue: 1,
         content: '<p>Hello</p><mj-include path="/etc/hosts" type="css" />',
         config: testConfig,
       })
-    ).toThrow("Email content cannot contain <mj-include>");
+    ).rejects.toThrow("Email content cannot contain <mj-include>");
   });
 
-  it("contains Resend unsubscribe placeholder", () => {
-    const html = EmailPage({
+  it("contains Resend unsubscribe placeholder", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 1,
       content: "<p>Hello</p>",
@@ -101,8 +101,8 @@ describe("EmailPage", () => {
     expect(html).toContain("{{{RESEND_UNSUBSCRIBE_URL}}}");
   });
 
-  it("contains MSO conditional comments for Outlook", () => {
-    const html = EmailPage({
+  it("contains MSO conditional comments for Outlook", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 1,
       content: "<p>Hello</p>",
@@ -112,8 +112,8 @@ describe("EmailPage", () => {
     expect(html).toContain("<!--[if mso");
   });
 
-  it("uses table-based layout for email client compatibility", () => {
-    const html = EmailPage({
+  it("uses table-based layout for email client compatibility", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 1,
       content: "<p>Hello</p>",
@@ -124,8 +124,8 @@ describe("EmailPage", () => {
     expect(html).toContain("</table>");
   });
 
-  it("uses a wider desktop reading width while staying responsive", () => {
-    const html = EmailPage({
+  it("uses a wider desktop reading width while staying responsive", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 1,
       content: "<p>Hello</p>",
@@ -136,8 +136,8 @@ describe("EmailPage", () => {
     expect(html).toContain('style="width:680px;"');
   });
 
-  it("keeps a single modest horizontal gutter for the content column", () => {
-    const html = EmailPage({
+  it("keeps a single modest horizontal gutter for the content column", async () => {
+    const html = await EmailPage({
       title: "My First Issue",
       issue: 1,
       content: "<p>Hello</p>",
@@ -148,14 +148,14 @@ describe("EmailPage", () => {
     expect(html).toContain('padding:0;word-break:break-word;');
   });
 
-  it("escapes HTML in config name and URL", () => {
+  it("escapes HTML in config name and URL", async () => {
     const evilConfig = {
       ...testConfig,
       name: 'News & "Letters"',
       url: "https://example.com/?a=1&b=2",
     };
 
-    const html = EmailPage({
+    const html = await EmailPage({
       title: "Test",
       issue: 1,
       content: "<p>Hello</p>",

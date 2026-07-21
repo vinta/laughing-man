@@ -113,7 +113,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     writeFileSync(join(issueDir, "index.html"), formatHtml(webPage), "utf8");
     writeFileSync(join(websiteDir, "issues", `${issue.issue}.md`), issue.rawContent, "utf8");
 
-    const emailHtml = EmailPage({
+    const emailHtml = await EmailPage({
       title: issue.title,
       issue: issue.issue,
       date: issue.date,

@@ -1,5 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { afterAll, afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { delimiter, join } from "node:path";
+import * as childProcessModule from "node:child_process";
+import * as buildModule from "../../src/commands/build";
+
+// Snapshot before mocking: the namespaces are live bindings, so spreading them later
+// would capture the mocked exports instead of the real ones
+const realChildProcess = { ...childProcessModule };
+const realBuild = { ...buildModule };
 
 const mockSpawnSync = mock(() => ({ status: 0 })) as any;
 const mockRunBuild = mock(async () => ({
@@ -12,12 +19,20 @@ const mockRunBuild = mock(async () => ({
 })) as any;
 
 mock.module("node:child_process", () => ({
+  ...realChildProcess,
   spawnSync: mockSpawnSync,
 }));
 
 mock.module("../../src/commands/build", () => ({
+  ...realBuild,
   runBuild: mockRunBuild,
 }));
+
+// Bun module mocks persist across test files; restore the real modules for later files
+afterAll(() => {
+  mock.module("node:child_process", () => realChildProcess);
+  mock.module("../../src/commands/build", () => realBuild);
+});
 
 const { runDeploy } = await import("../../src/commands/deploy");
 

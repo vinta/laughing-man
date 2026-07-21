@@ -1,8 +1,13 @@
-import { describe, expect, it, beforeEach, afterEach, mock, spyOn } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach, afterAll, mock, spyOn } from "bun:test";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import os from "node:os";
 import Cloudflare from "cloudflare";
+import * as cloudflareModule from "../../src/pipeline/cloudflare";
+
+// Snapshot before mocking: the namespace is a live binding, so spreading it later
+// would capture the mocked exports instead of the real ones
+const realCloudflare = { ...cloudflareModule };
 
 // Mock the cloudflare module before importing setup-web
 const mockDiscoverAccountId = mock(() => Promise.resolve("acc_123"));
@@ -14,12 +19,18 @@ const mockEnsureDnsRecord = mock((): Promise<{ status: string; domain?: string; 
 const mockCreateClient = mock(() => ({}));
 
 mock.module("../../src/pipeline/cloudflare", () => ({
+  ...realCloudflare,
   createClient: mockCreateClient,
   discoverAccountId: mockDiscoverAccountId,
   ensureProject: mockEnsureProject,
   ensureDomain: mockEnsureDomain,
   ensureDnsRecord: mockEnsureDnsRecord,
 }));
+
+// Bun module mocks persist across test files; restore the real module for later files
+afterAll(() => {
+  mock.module("../../src/pipeline/cloudflare", () => realCloudflare);
+});
 
 const { runSetupWeb } = await import("../../src/commands/setup-web");
 
